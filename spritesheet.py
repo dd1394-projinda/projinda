@@ -4,8 +4,9 @@
 #
 # The pygame wiki notes that this class was originally taken from:
 # www.scriptefun.com/transcript-2-using-sprite-sheets-and-drawing-the-background
-#
+# has been modified for python 3
 
+import pygame
 import pygame
 
 class spritesheet(object):
@@ -13,8 +14,8 @@ class spritesheet(object):
         try:
             self.sheet = pygame.image.load(filename).convert()
         except pygame.error, message:
-            print 'Unable to load spritesheet image:', filename
-            raise SystemExit, message
+            print ('Unable to load spritesheet image:', filename)
+            raise (SystemExit, message)
     # Load a specific image from a specific rectangle
     def image_at(self, rectangle, colorkey = None):
         "Loads image from x,y,x+offset,y+offset"

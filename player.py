@@ -5,7 +5,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        ss_walk = spritesheet.spritesheet("images/walk.png")
+        ss_walk = spritesheet.spritesheet("images/walk.png") 
         ss_idle = spritesheet.spritesheet("images/idle.png")
         ss_jump = spritesheet.spritesheet("images/jump.png")
         ss_run  = spritesheet.spritesheet("images/run.png")

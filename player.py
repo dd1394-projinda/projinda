@@ -64,6 +64,15 @@ class Player(pygame.sprite.Sprite):
     def move(self, delta):
        self.rect.x += self.vx * delta
        self.rect.x = int(self.x)
+       self.y += self.vy * delta
+       self.rect.y = int(self.y)
+       
+       if self.rect.bottom >= ground: ##måste definiera bottom av player så vi kan recorda när de kolliderar med marken
+           ##sätt bottom av player till groundnivån
+           self.vy = 0
+           self.on_ground = True
+        else:
+        self.on_ground = False
         
     def set_state(self):
         if not self.on_ground:
@@ -74,10 +83,9 @@ class Player(pygame.sprite.Sprite):
             self.state = walk
             
             ##potentiellt lägg till dash action här
-        
     
     def apply_gravity(self, delta):
-        pass
+        self.vy += self.gravity * delta
             
     def animate(self):
         self.frame += self.animation_speed

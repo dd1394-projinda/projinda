@@ -16,19 +16,23 @@ class Player(pygame.sprite.Sprite):
             "jump": ss_jump.load_strip((0, 0, 128, 128), 13),
             "run":  ss_run.load_strip((0, 0, 128, 128), 7),
         }
+        
+        self.state = "idle"
+        self.frame = 0
+        self.animation_speed = 0.15
     
         self.image = self.animations[self.state][0]
         self.rect = self.image.get_rect()
         
-        self.vx
-        self.vy
-        self.speed
-        self.jump_strength
-        self.gravity
-        self.on_ground
-        self.state = "idle"
-        self.frame = 0
-        self.animation_speed = 0.15
+        self.x = float(self.rect.x) #prevents choppy movement
+        self.y = float(self.rect.y) #prevents choppy movement
+        self.vx = 0
+        self.vy = 0
+        self.speed = 200
+        self.jump_strength = 500
+        self.gravity = 1000
+        self.on_ground = True
+   
 
     def update(self, keys, delta):
         self.handle_input(keys)
@@ -54,26 +58,34 @@ class Player(pygame.sprite.Sprite):
             
         if keys[pygame.K_SPACE] and self.on_ground:
             self.vy = -self.jump_strength
-            self.on_ground = false
+            self.on_ground = False
             
 
-        def move(self, delta):
-            
-           
-        def set_state(self):
-            
+    def move(self, delta):
+       self.rect.x += self.vx * delta
+       self.rect.x = int(self.x)
         
-        def gravity(self, delta):
+    def set_state(self):
+        if not self.on_ground:
+            self.state = jump
+        elif self.vx == 0:
+            self.state= idle
+        else: 
+            self.state = walk
             
-                
+            ##potentiellt lägg till dash action här
+        
+    
+    def apply_gravity(self, delta):
+        pass
             
-        def animate(self):
-            self.frame += self.animation_speed
+    def animate(self):
+        self.frame += self.animation_speed
 
-            if self.frame >= len(self.animations[self.state]):
-                self.frame = 0
+        if self.frame >= len(self.animations[self.state]):
+            self.frame = 0
 
-            self.image = self.animations[self.state][int(self.frame)]
-            
-     
+        self.image = self.animations[self.state][int(self.frame)]
+        
+    
         

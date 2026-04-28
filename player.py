@@ -6,11 +6,10 @@ import pygame
 import spritesheet
 import os
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-
-        """ COMMENTED OUT TEMPORARY
 
         BASE_DIR = os.path.dirname(__file__)
         ss_walk = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "walk.png"))
@@ -29,13 +28,14 @@ class Player(pygame.sprite.Sprite):
         self.frame              = 0
         self.animation_speed    = 0.15
         self.image              = self.animations[self.state][0]
-        """        
+               
 
+        """
             ### TEMPORARY ###
         self.image = pygame.Surface((50,50))
         self.image.fill((200, 170, 230))
             ### TEMPORARY ###
-
+        """
 
         self.rect   = self.image.get_rect()
         self.rect.x = 450
@@ -58,10 +58,10 @@ class Player(pygame.sprite.Sprite):
         self.apply_gravity(delta)
         self.move(delta, ground)
 
-        """
+        
         self.set_state()
-        self.animate(delta)
-        """
+        self.animate()
+        
         
         
     def handle_input(self, keys):
@@ -109,8 +109,8 @@ class Player(pygame.sprite.Sprite):
             self.frame = 0
             
 
-    def animate(self, delta):
-        self.frame += self.animation_speed * delta
+    def animate(self):
+        self.frame += self.animation_speed
 
         if self.frame >= len(self.animations[self.state]):
             self.frame = 0

@@ -34,26 +34,24 @@ class Player(pygame.sprite.Sprite):
         self.on_ground = True
    
 
-    def update(self, keys, delta):
+    def update(self, keys, delta, ground): ##kanske lägg typ "levels", "ground", "platforms". alltså ett sätt för spelaren att se om den är på marken eller inte
         self.handle_input(keys)
-        self.gravity(delta)
-        self.move(delta)
+        self.apply_gravity(delta)
+        self.move(delta, ground)
         self.set_state()
         self.animate()
         
         
-    def handle_input(self):
-        keys = pygame.key.get_pressed()
-        
+    def handle_input(self, keys):
         self.vx = 0
         
-        if keys[pygame.K_LEFT]: # kan ändra till K_a
+        if keys[pygame.K_a]: 
             self.vx = -self.speed
 
-        if keys[pygame.K_RIGHT]: # kan ändra till K_d
+        if keys[pygame.K_d]: 
             self.vx = self.speed
             
-        if keys[pygame.K_RIGHT] and keys[pygame.K_LEFT]:
+        if keys[pygame.K_a] and keys[pygame.K_d]:
             self.vx = 0
             
         if keys[pygame.K_SPACE] and self.on_ground:
@@ -61,8 +59,8 @@ class Player(pygame.sprite.Sprite):
             self.on_ground = False
             
 
-    def move(self, delta):
-       self.rect.x += self.vx * delta
+    def move(self, delta, ground):
+       self.x += self.vx * delta
        self.rect.x = int(self.x)
        self.y += self.vy * delta
        self.rect.y = int(self.y)
@@ -71,24 +69,29 @@ class Player(pygame.sprite.Sprite):
            ##sätt bottom av player till groundnivån
            self.vy = 0
            self.on_ground = True
-        else:
-        self.on_ground = False
+       else:
+           self.on_ground = False
         
     def set_state(self):
         if not self.on_ground:
-            self.state = jump
+            new_state = "jump"
         elif self.vx == 0:
-            self.state= idle
+            new_state= "idle"
         else: 
-            self.state = walk
+            new_state = "walk"
             
             ##potentiellt lägg till dash action här
+            
+        if new_state != self.state:
+            self.state = new_state
+            self.frame = 0
     
     def apply_gravity(self, delta):
         self.vy += self.gravity * delta
+        ##behöver input från game.py så spelare kan interagera med marken.
             
     def animate(self):
-        self.frame += self.animation_speed
+        self.frame += self.animation_speed * delta
 
         if self.frame >= len(self.animations[self.state]):
             self.frame = 0

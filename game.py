@@ -13,7 +13,7 @@ import os
 from enum import Enum           # Enumeration, name constant values
 
 from field import Field
-field = Field()
+
 
 from player import Player
 player = Player()
@@ -21,13 +21,10 @@ player = Player()
 
 from camera import Camera
 
-player.set_initial_spawn(field)
-
 
 # -----------------
 # WINDOW PROPERTIES
 # -----------------
-(width, height)     = (1000, 500)           # Window size
 caption             = "Platform Game"       # Window name
 background_colour   = (0,0,0)               # Amount of red, green, blue (255 is max, 0 is no color)
 platform_colour     = (95, 148, 108)      
@@ -40,18 +37,21 @@ TEXT_FUNCTIONS      = "Press r to reset and q to quit"      # Instructions messa
 SCREEN_WIDTH        = 1000
 SCREEN_HEIGHT       = 500
 WORLD_WIDTH         = 5000
-W0RLD_HEIGHT        = 500
+WORLD_HEIGHT        = 500
 
 
 # -----------------
 # CREATE WINDOW
 # -----------------
+
+
 pygame.init()                                           # Initialize pygame
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))     # Create screen
 pygame.display.set_caption(caption)                     # Add caption to window
 
-camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_WIDTH, W0RLD_HEIGHT)
-
+camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT)
+field = Field(WORLD_WIDTH, WORLD_HEIGHT)
+player.set_initial_spawn(field)
 
 
 # -----------------
@@ -67,7 +67,7 @@ small_font = pygame.font.SysFont(TEXT_FONT, 30)
 # -----------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))                                           # Define directory as the current
 background_image = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()      # Ladda in bilden
-background_image = pygame.transform.smoothscale(background_image, (width, height))              # Skala om den till skärmens storlek
+background_image = pygame.transform.smoothscale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))              # Skala om den till skärmens storlek
 bg_width = background_image.get_width()                                                         
 
 
@@ -75,7 +75,7 @@ bg_width = background_image.get_width()
 # GOAL
 # -----------------
 def reset_goal():       # Function to reset goal for randomization
-    goal_x = random.randint(0, 980) 
+    goal_x = random.randint(0, WORLD_WIDTH - 75)
     goal_y = 400 - 250
     return pygame.Rect(goal_x, goal_y, 75, 225) 
 goal_rect = reset_goal()        # Create the goal  
@@ -90,7 +90,7 @@ def base_frame():                           # Frame where the world is
     
     offset_x = -camera.camera.x % bg_width       # Define the cameras offset
 
-    for x in range(-bg_width, width + bg_width, bg_width):      # Gör så att bakgrunden scrollar när spelaren rör på sig
+    for x in range(-bg_width, SCREEN_WIDTH + bg_width, bg_width):      # Gör så att bakgrunden scrollar när spelaren rör på sig
         screen.blit(background_image, (x + offset_x, 0))        # Paint it onto the screen
 
     screen.blit(goal_image, goal_rect.move(-camera.camera.x, -camera.camera.y))

@@ -3,16 +3,19 @@
 # -----------------
 
 import pygame
-pygame.init()
+import random
 
-
-WORLD_END = 200     # 10_000 pixel world
-WORLD_BEGIN = 0
 TILE = 50
 CORNER = 10
 
 class Field(): 
-    def __init__(self):
+    def __init__(self,world_width, world_height):
+        self.world_width = world_width
+        self.world_height = world_height
+        
+        self.world_begin = 0                    #flyttade world begin och end in i klassen eftersom de ska bli beroende av game
+        self.world_end = world_width // TILE
+
         self.platforms = []
         self.enemies = []
         self.build_world()
@@ -27,16 +30,26 @@ class Field():
         # -----------------
         
         # Ground
-        a = 4
-        self.add_platform(WORLD_BEGIN,  a,              400,    100)
-        self.add_platform(a+2,            WORLD_END,    400,    100)
+        """"a = 4
+        self.add_platform(self.world_begin,  a,              400,    100)
+        self.add_platform(a+2,            self.world_end,    400,    100)""" #jag bara testar lite grejer
+        
+        
+        heights = [500, 400, 300]        
+
+        for block in range(self.world_begin, self.world_end):
+            y = random.choice(heights)
+            
+            self.platforms.append(pygame.Rect(block * TILE, y, TILE, self.world_height - y)) ##needs some work
+
+        
 
         # Fall
-        self.add_enemy((WORLD_BEGIN - CORNER) * TILE,     500,   (WORLD_END + CORNER) * TILE,    500)
+        self.add_enemy((self.world_begin - CORNER) * TILE,     500,   (self.world_end + CORNER) * TILE,    500)
 
         # World borders
-        self.add_platform(WORLD_BEGIN - CORNER,     WORLD_BEGIN,        50,   500)
-        self.add_platform(WORLD_END,                WORLD_END + CORNER,    50,   500)
+        self.add_platform(self.world_begin - CORNER,     self.world_begin,        50,   500)
+        self.add_platform(self.world_end,                self.world_end + CORNER,    50,   500)
         
         # Platforms
         self.add_platform(0,    2,      350,    50)

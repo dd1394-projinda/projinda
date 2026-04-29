@@ -35,7 +35,7 @@ class Player(pygame.sprite.Sprite):
         
         self.state              = "idle"
         self.frame              = 0
-        self.animation_speed    = 0.15
+        self.animation_speed    = 12
         self.image              = self.animations[self.state][0]
                
 

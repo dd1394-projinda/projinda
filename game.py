@@ -12,14 +12,16 @@ import os
 
 from enum import Enum           # Enumeration, name constant values
 
+from field import Field
+field = Field()
+
 from player import Player
 player = Player()
 
 from camera import Camera
 camera = Camera(1000, 500)
 
-from field import Field
-field = Field()
+player.set_initial_spawn(field)
 
 
 # -----------------
@@ -29,7 +31,7 @@ field = Field()
 caption             = "Platform Game"       # Window name
 background_colour   = (0,0,0)               # Amount of red, green, blue (255 is max, 0 is no color)
 platform_colour     = (95, 148, 108)      
-enemy_colour        = (255,0,0) 
+enemy_colour        = (173, 69, 31)
 TEXT_COLOR          = (255, 255, 255)
 TEXT_FONT           = "consolas"                            # Type of font
 TEXT_WIN            = "You won!"                            # Game state messages
@@ -165,7 +167,7 @@ while running:      # Game loop keeps the window and game going
         screen.blit(text,(100,100))
         screen.blit(instructions,(100,200))
         if keys[pygame.K_r]: 
-            player.reset_after_win()
+            player.reset_after_win(field)
             goal_rect = reset_goal()
             state = GameState.PLAYING
         elif keys[pygame.K_q]: running = False

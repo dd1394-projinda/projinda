@@ -69,12 +69,57 @@ class Player(pygame.sprite.Sprite):
         self.gravity        = 2000
         self.on_ground      = True
 
+        self.spawn          = None
     
+
     # -----------------
-    # Reset methods
+    # SPAWN METHODS
+    # -----------------
+    """ CAN'T GET RANDOM SPAWN TO WORK PROPERLY """
+    def get_spawn(self, field):
+        attempts = 50
+        for _ in range(attempts):
+            x = random.randint(200, 800)        # Horizontal range
+            y = 100                             # Fixed spawn height
+
+            # Create a rect where the player would spawn
+            test_rect = pygame.Rect(x, y, self.rect.width, self.rect.height)
+
+            # 1️ Check if the spawn itself is empty
+            if field.is_solid(test_rect):
+                continue
+
+            # 2 Check if spawn collides with enemy block
+            if any(test_rect.colliderect(e) for e in field.enemies):
+                continue
+
+            # 3 Check if there is a platform below at y >= 400
+            platform_below = None
+            for p in field.platforms:
+                if x + self.rect.width > p.left and x < p.right:
+                    platform_below = p
+                    break
+
+            if not platform_below:
+                continue  # try another x
+            
+            # set spawn y to be on top of the platform
+            y = platform_below.top - self.rect.height
+            return x, y
+
+        return 500, 500     # fallback if no safe spot found
+
+    def set_initial_spawn(self, field):
+        if self.spawn is None:
+            self.spawn = self.get_spawn(field)
+        self.x, self.y = self.spawn
+        self.reset()
+
+
+    # -----------------
+    # RESET METHODS
     # -----------------
     def reset(self):
-        self.y = 350
         self.vx = 0
         self.vy = 0
         self.on_ground = True
@@ -88,14 +133,26 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = int(self.y)
 
     def reset_after_death(self):
-        self.x = 475
+        """
+        if self.spawn is None:
+            self.spawn = 600,350    # Fallback, shouldn't happen
+        self.x, self.y = self.spawn
+        """
+
+        self.x, self.y = 600,350
         self.reset()
 
-    def reset_after_win(self):
-        self.x = random.randint(250,500)
+    def reset_after_win(self, field):
+        """
+        safe_spawn = self.get_spawn(field)
+        self.spawn = safe_spawn
+        self.x, self.y = self.spawn
+        """
+
+        self.x, self.y = random.randint(300,800), 350
         self.reset()
-    
-    
+
+        
     # -----------------
     # MAIN UPDATE LOOP
     # -----------------

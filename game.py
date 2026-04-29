@@ -5,7 +5,8 @@
 
 import pygame
 import random
-
+import time
+import os
 
 # -----------------
 # Window properties
@@ -13,8 +14,7 @@ import random
 (width, height)     = (1000, 500)           # Size of window
 caption             = "Platform game"       # Window name
 background_colour   = (224, 247, 250)       # Amount of red, green, blue (255 is max, 0 is no color)
-platform_colour     = (230, 180, 200)       
-player_colour       = (200, 170, 230)
+platform_colour     = (0, 0, 0)       
 #dirt_colour        = (205, 175, 140)
 #cloud_colour       = (255, 205, 225)
 
@@ -33,18 +33,36 @@ enemy_rect          = pygame.Rect(300, 365, 35, 35)
 pygame.init()                                           # Initialize pygame
 screen = pygame.display.set_mode((width, height))       # Create window / screen
 pygame.display.set_caption(caption)                     # Add caption to window
+
+
+"""
+BASE_DIR = os.path.dirname(__file__)
+background_image = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()
+background_image = pygame.transform.smoothscale(background_image, (width, height))
+bg_width = background_image.get_width()
+bg_height = background_image.get_height()
+
+goal_image = pygame.image.load(os.path.join(BASE_DIR, "images", "goal.png")).convert_alpha()
+goal_image = pygame.transform.scale(goal_image, (50, 150))
+goal_rect = goal_image.get_rect(topleft=(goal_x, 400 - 150))
+"""
+
 font = pygame.font.SysFont(None, 72)
-TEXT_COLOR = (0, 0, 0)
+TEXT_COLOR = (255, 255, 255)
 
-
-# Extend player class, create object / player
+# Extend player class, create object / player, camera
 from player import Player
 player = Player()
 
+"""
+from camera import Camera
+camera = Camera(1000, 500)
+"""
 
 """ Base frame """
 def base_frame():
-    screen.fill(background_colour)                      # Fill the screen with colour
+        # horizontal scroll based on camera
+    #offset_x = camera.camera.x % bg_width
 
     pygame.draw.rect(screen, platform_colour, (0, 400, 1000, 100))              # draw block (x,y,width,height), x,y is top left corner (0,0) increases to bottom right corner
     pygame.draw.rect(screen, (255,0,0), enemy_rect)
@@ -83,6 +101,7 @@ clock = pygame.time.Clock()                 # Pygame's clock, fairly accurate ti
 running = True
 state = GameState.PLAYING
 while running:
+    
     delta = clock.tick(60) / 1000                   # The frame is at most updated 60 times per second
     running, keys = check_events()                  # Get the running state and keys pressed
     

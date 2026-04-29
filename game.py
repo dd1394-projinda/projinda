@@ -1,5 +1,5 @@
 # -----------------
-# Game: open window, game loop, get tangent input, win/lose
+# Game: open window, game loop, tangent input, win/lose
 # -----------------
 
 
@@ -8,12 +8,11 @@
 # -----------------
 import pygame
 import random
-import time
 import os
 
 from enum import Enum           # Enumeration, name constant values
 
-from player import Player 
+from player import Player
 player = Player()
 
 from camera import Camera
@@ -30,65 +29,78 @@ field = Field()
 caption             = "Platform Game"       # Window name
 background_colour   = (0,0,0)               # Amount of red, green, blue (255 is max, 0 is no color)
 platform_colour     = (95, 148, 108)      
+enemy_colour        = (255,0,0) 
+TEXT_COLOR          = (255, 255, 255)
+TEXT_FONT           = "consolas"                            # Type of font
+TEXT_WIN            = "You won!"                            # Game state messages
+TEXT_LOSE           = "Maybe try again..."
+TEXT_FUNCTIONS      = "Press r to reset and q to quit"      # Instructions message
 
 
 # -----------------
 # CREATE WINDOW
 # -----------------
 pygame.init()                                           # Initialize pygame
-screen = pygame.display.set_mode((width, height))       # Create window / screen
+screen = pygame.display.set_mode((width, height))       # Create screen
 pygame.display.set_caption(caption)                     # Add caption to window
-font = pygame.font.SysFont(None, 72)
-TEXT_COLOR = (255, 255, 255)
+
+
+# -----------------
+# FONT
+# -----------------
+font = pygame.font.SysFont(TEXT_FONT, 75)               # Create font
+small_font = pygame.font.SysFont(TEXT_FONT, 30)
+
 
 
 # -----------------
 # BACKGROUND
 # -----------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-background_image = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()      #ladda bgbild
-background_image = pygame.transform.smoothscale(background_image, (width, height))              # skala om den till skärmens storlek
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))                                           # Define directory as the current
+background_image = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()      # Ladda in bilden
+background_image = pygame.transform.smoothscale(background_image, (width, height))              # Skala om den till skärmens storlek
 bg_width = background_image.get_width()                                                         
 
 
 # -----------------
 # GOAL
 # -----------------
-def reset_goal():
-    goal_x              = random.randint(700, 980)
+def reset_goal():       # Function to reset goal for randomization
+    goal_x = random.randint(700, 980) 
     goal_y = 400 - 250
     return pygame.Rect(goal_x, goal_y, 75, 225) 
-                                    #skala om till rätt storlek
-goal_rect = reset_goal()
-goal_image = pygame.image.load(os.path.join(BASE_DIR, "images", "goal.png")).convert_alpha()    #ladda in målgrafik
+goal_rect = reset_goal()        # Create the goal  
+goal_image = pygame.image.load(os.path.join(BASE_DIR, "images", "goal.png")).convert_alpha()    # Ladda in målgrafik
 goal_image = pygame.transform.scale(goal_image, (75, 225))  
-
-
-# -----------------
-# ENEMIES
-# -----------------
-enemy_rect          = pygame.Rect(300, 365, 35, 35)
 
 
 # -----------------
 # BASE FRAME
 # -----------------
-def base_frame():
-    screen.fill(background_colour)                      # Fill the screen with colour
+def base_frame():                           # Frame where the world is
+    screen.fill(background_colour)          # Fill the screen with colour
     
-    offset_x = camera.camera.x % bg_width 
+    offset_x = camera.camera.x % bg_width       # Define the cameras offset
 
-    for x in range(-bg_width, width + bg_width, bg_width): #gör så att bakgrunden scrollar när spelaren rör på sig
-        screen.blit(background_image, (x + offset_x, 0)) 
+    for x in range(-bg_width, width + bg_width, bg_width):      # Gör så att bakgrunden scrollar när spelaren rör på sig
+        screen.blit(background_image, (x + offset_x, 0))        # Paint it onto the screen
 
-    platform_rect = pygame.Rect(0,400,1000,100)
-    pygame.draw.rect(screen, platform_colour, platform_rect.move(-camera.camera.x, -camera.camera.y))              # draw block (x,y,width,height), x,y is top left corner (0,0) increases to bottom right corner
-    pygame.draw.rect(screen, (255,0,0),enemy_rect.move(-camera.camera.x, -camera.camera.y))
     screen.blit(goal_image, goal_rect.move(-camera.camera.x, -camera.camera.y))
-    #pygame.draw.rect(screen, (0, 255, 0), goal_rect.move(-camera.camera.x, -camera.camera.y))                            # målet, där spelaren går för att vinna
 
-    small_platform = pygame.Rect(100,350,50,50)
-    pygame.draw.rect(screen, platform_colour, small_platform.move(-camera.camera.x, -camera.camera.y))
+    for p in field.platforms:       # Blocks are made in field.py, from the list of platforms, paint them all onto the screen
+        pygame.draw.rect(
+            screen,
+            platform_colour,
+            p.move(-camera.camera.x, -camera.camera.y)
+        )
+
+    for e in field.enemies:
+        pygame.draw.rect(
+            screen,
+            enemy_colour,
+            e.move(-camera.camera.x, -camera.camera.y)
+        )
+
 
 
 # -----------------
@@ -105,57 +117,61 @@ def check_events():
 # -----------------
 # GAME STATE
 # -----------------
-class GameState(Enum):
+class GameState(Enum):          # Enum to have constant values
     PLAYING = 1
     WON = 2
     LOST = 3
-state = GameState.PLAYING
+state = GameState.PLAYING       # Set state to playing
 
 
 # -----------------
 # CLOCK
 # -----------------
-clock = pygame.time.Clock()                 # Pygame's clock, fairly accurate timing, to use for the game loop
+clock = pygame.time.Clock()     # Use for the game loop
 
 
 # -----------------
-# WINDOW RUNNING
+# GAME LOOP
 # -----------------
-running = True
-while running:
+running = True      # Loop's running state
+while running:      # Game loop keeps the window and game going
     
-    delta = clock.tick(60) / 1000                   # The frame is at most updated 60 times per second
-    running, keys = check_events()                  # Get the running state and keys pressed
+    delta = clock.tick(60) / 1000        # The frame is at most updated 60 times per second
+    running, keys = check_events()       # Get the running state and keys pressed
         
-    camera.update(player)       #kameran följer efter spelaren
-    base_frame()
+    camera.update(player)       # Kameran följer efter spelaren
+    base_frame()                # Clean frame
 
-    if state == GameState.PLAYING:
-        player.update(keys,delta,field)
-        if player.rect.colliderect(goal_rect):
+    if state == GameState.PLAYING:                  # Determine current game state
+        player.update(keys,delta,field)             # Update player position
+        if player.rect.colliderect(goal_rect):      # If contact with goal -> win
             state = GameState.WON
-        if player.rect.colliderect(enemy_rect):
+        if field.is_enemy(player.rect):             # If contact with enemy block -> lose
             state = GameState.LOST
 
     elif state == GameState.LOST:
-        text = font.render("Try again! Press r \n ): quit with q", True, TEXT_COLOR)
-        screen.blit(text,(100,100))
-        if keys[pygame.K_r] and not keys[pygame.K_d]: 
-            player.reset_after_death()
-            state = GameState.PLAYING
-        elif keys[pygame.K_q]: running = False
+        text = font.render(TEXT_LOSE, True, TEXT_COLOR)                         # Render text
+        instructions = small_font.render(TEXT_FUNCTIONS, True, TEXT_COLOR)      
+        screen.blit(text,(100,100))                                             # Paint the text on the screen
+        screen.blit(instructions,(100,200))
+        if keys[pygame.K_r] and not keys[pygame.K_d]:           # Tanget input handle for reset and quit
+            player.reset_after_death()              # Reset function in player, specific for certain game outcomes
+            state = GameState.PLAYING               # To keep going after reset  
+        elif keys[pygame.K_q]: running = False      # Closes the window immediatly
 
     elif state == GameState.WON:
-        text = font.render("You won! To reset press r, to quit q", True, TEXT_COLOR)
+        text = font.render(TEXT_WIN, True, TEXT_COLOR)
+        instructions = small_font.render(TEXT_FUNCTIONS, True, TEXT_COLOR)
         screen.blit(text,(100,100))
+        screen.blit(instructions,(100,200))
         if keys[pygame.K_r]: 
             player.reset_after_win()
             goal_rect = reset_goal()
             state = GameState.PLAYING
         elif keys[pygame.K_q]: running = False
 
-    player_screen_rect = player.rect.move(-camera.camera.x, -camera.camera.y)
-    screen.blit(player.image, player_screen_rect)
-    pygame.display.update()     # Update display / screen
+    player_screen_rect = player.rect.move(-camera.camera.x, -camera.camera.y)       # Move player
+    screen.blit(player.image, player_screen_rect)                                   # Paint player corresponding to it's environment
+    pygame.display.update()     # Update screen
     
     

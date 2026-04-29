@@ -107,6 +107,7 @@ class Player(pygame.sprite.Sprite):
     # ----------------
 
     def update(self, keys, delta, field): ##kanske lägg typ "levels", "ground", "platforms". alltså ett sätt för spelaren att se om den är på marken eller inte
+        self.on_ground = self.is_on_ground(field)
         self.handle_input(keys, field)
         self.apply_gravity(delta)
         self.move(delta, field)
@@ -218,7 +219,8 @@ class Player(pygame.sprite.Sprite):
     delta (float): Tid sedan föregående frame.
     """
     def apply_gravity(self, delta):
-        self.vy += self.gravity * delta
+       if not self.on_ground:
+           self.vy += self.gravity * delta
         ##behöver input från game.py så spelare kan interagera med marken.
             
     

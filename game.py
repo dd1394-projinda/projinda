@@ -8,14 +8,13 @@ import pygame
 import sys 
 import random
 import time
-
+import os
 
 """ Window properties """
 (width, height)     = (1000, 500)           # Size of window
 caption             = "Platform game"       # Window name
 background_colour   = (224, 247, 250)       # Amount of red, green, blue (255 is max, 0 is no color)
-platform_colour     = (230, 180, 200)       
-player_colour       = (200, 170, 230)
+platform_colour     = (20, 30, 80)       
 #dirt_colour        = (205, 175, 140)
 #cloud_colour       = (255, 205, 225)
 goal_x = random.randint(700, 950)
@@ -28,9 +27,14 @@ winner_text = ""
 pygame.init()                                           # Initialize pygame
 screen = pygame.display.set_mode((width, height))       # Create window / screen
 pygame.display.set_caption(caption)                     # Add caption to window
-font = pygame.font.SysFont(None, 72)
-TEXT_COLOR = (0, 0, 0)
+BASE_DIR = os.path.dirname(__file__)
+background_image = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()
+background_image = pygame.transform.smoothscale(background_image, (width, height))
+bg_width = background_image.get_width()
 
+bg_height = background_image.get_height()
+font = pygame.font.SysFont(None, 72)
+TEXT_COLOR = (255, 255, 255)
 
 # Extend player class, create object / player, camera
 from player import Player
@@ -42,13 +46,14 @@ camera = Camera(1000, 500)
 
 """ Base frame """
 def base_frame():
-    screen.fill(background_colour)                      # Fill the screen with colour
+        # horizontal scroll based on camera
+    offset_x = camera.camera.x % bg_width
 
-    # draw block (x,y,width,height), x,y is top left corner (0,0) increases to bottom right corner
+    for x in range(-bg_width, width + bg_width, bg_width):
+        screen.blit(background_image, (x + offset_x, 0))
+
     pygame.draw.rect(screen, platform_colour, (0, 400, 1000, 100))
-    #pygame.draw.rect(screen, dirt_colour, (0,430,1000,70))
-    
-    pygame.draw.rect(screen, (255, 0, 0), camera.apply(goal_rect)) ##målet, där spelaren går för att vinna
+    pygame.draw.rect(screen, (255, 0, 0), camera.apply(goal_rect))
 
 
 """ Collect events """

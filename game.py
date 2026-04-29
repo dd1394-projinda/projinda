@@ -11,6 +11,7 @@ __tangent input
 # Import pygame for graphics and game functions
 import pygame
 import sys 
+import random
 
 
 """ Window properties """
@@ -21,6 +22,8 @@ platform_colour     = (230, 180, 200)
 player_colour       = (200, 170, 230)
 #dirt_colour        = (205, 175, 140)
 #cloud_colour       = (255, 205, 225)
+goal_x = random.randint(700, 950)
+goal_rect = pygame.Rect(goal_x, 350, 20, 50)
 
 
 """ Create window """
@@ -36,6 +39,8 @@ def base_frame():
     # draw block (x,y,width,height), x,y is top left corner (0,0) increases to bottom right corner
     pygame.draw.rect(screen, platform_colour, (0, 400, 1000, 100))
     #pygame.draw.rect(screen, dirt_colour, (0,430,1000,70))
+    
+    pygame.draw.rect(screen, (255, 0, 0), goal_rect) ##målet, där spelaren går för att vinna
 
 
 """ Collect events """
@@ -69,11 +74,16 @@ while running:
     dt = clock.tick(60)                             # The frame is at most updated 60 times per second
     running, keys = check_events()                  # Get the running state and keys pressed
 
-    if keys[pygame.K_d]:                            # if d is pressed
-        player.x += player_speed * dt / 1000        # Player moves to the right
-    if keys[pygame.K_a]:
-        player.x -= player_speed * dt / 1000
+    ground = 400
+    player.update(keys, delta, ground)
+    
+    if player.rect.colliderect(goal_rect):
+        print("You win!")
+        running = False
 
     base_frame()                # Clean the frame / remove the players previous position
-    player.show()               # Draw the player, function from the player class
+    screen.blit(player.image, player.rect)
     pygame.display.update()     # Update display / screen
+    
+    
+

@@ -10,7 +10,7 @@ __tangent input
 
 # Import pygame for graphics and game functions
 import pygame
-import sys
+import sys 
 
 
 """ Window properties """

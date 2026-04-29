@@ -1,9 +1,18 @@
 import pygame
 import spritesheet
 
-class Player(pygame.sprite.Sprite):
+class Player(pygame.sprite.Sprite): 
+    """
+    Representerar spelaren.
+
+    Klassen hanterar spelarens rörelse, gravitation, hopp,
+    markkollision och animationer baserat på spelarens state.
+    """
+
     def __init__(self):
-        super().__init__()
+        """ 
+        Initierar spelaren och laddar in animationer för olika states.
+        """
 
         ss_walk = spritesheet.spritesheet("images/walk.png") 
         ss_idle = spritesheet.spritesheet("images/idle.png")
@@ -33,7 +42,15 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 1000
         self.on_ground = True
    
-
+        """
+         Uppdaterar spelarens rörelse och gravitation. animerar spelaren.
+         
+         Parametrar:
+        keys (Sequence[bool]): Tangentstatus från pygame.
+        delta (float): Tid sedan föregående frame.
+        ground (int | float): Y-position för marknivå.
+        """
+   
     def update(self, keys, delta, ground): ##kanske lägg typ "levels", "ground", "platforms". alltså ett sätt för spelaren att se om den är på marken eller inte
         self.handle_input(keys)
         self.apply_gravity(delta)
@@ -41,6 +58,13 @@ class Player(pygame.sprite.Sprite):
         self.set_state()
         self.animate()
         
+        """
+        Tolkar key input och uppdaterar spelarens horisontella
+        hastighet samt initierar hopp.
+        
+        parametrar:
+        keys (Sequence[bool]): Tangentstatus från pygame.
+        """
         
     def handle_input(self, keys):
         self.vx = 0
@@ -59,8 +83,16 @@ class Player(pygame.sprite.Sprite):
             self.on_ground = False
             
 
+    """
+    Flyttar spelaren baserat på hastighet och tid, samt hanterar
+    kollision med marknivån.
+    
+    paratemetrar:
+        delta (float): Tid sedan föregående frame.
+        ground (int | float): Y-position för marknivå. BEHÖVER LÄGGAS TILL I GAME.PY
+     """    
+    
     def move(self, delta, ground):
-       self.x += self.vx * delta
        self.rect.x = int(self.x)
        self.y += self.vy * delta
        self.rect.y = int(self.y)
@@ -71,6 +103,11 @@ class Player(pygame.sprite.Sprite):
            self.on_ground = True
        else:
            self.on_ground = False
+        
+    """
+    Bestämmer spelarens nuvarande state (idle, walk, jump)
+    baserat på rörelse och om spelaren är på marken.
+    """
         
     def set_state(self):
         if not self.on_ground:
@@ -86,11 +123,24 @@ class Player(pygame.sprite.Sprite):
             self.state = new_state
             self.frame = 0
     
+    """
+    Sätter gravitation på spelarens vertikala hastighet
+   
+    parameter:
+    delta (float): Tid sedan föregående frame.
+    """
+   
     def apply_gravity(self, delta):
         self.vy += self.gravity * delta
         ##behöver input från game.py så spelare kan interagera med marken.
             
-    def animate(self):
+    """
+    uUpdaterar animation baserat på spelarens state och animationshastighet
+    
+    parameter:
+    delta (float): Tid sedan föregående frame.
+    """
+    def animate(self, delta):
         self.frame += self.animation_speed * delta
 
         if self.frame >= len(self.animations[self.state]):

@@ -14,11 +14,10 @@ import os
 (width, height)     = (1000, 500)           # Size of window
 caption             = "Platform game"       # Window name
 background_colour   = (224, 247, 250)       # Amount of red, green, blue (255 is max, 0 is no color)
-platform_colour     = (20, 30, 80)       
+platform_colour     = (0, 0, 0)       
 #dirt_colour        = (205, 175, 140)
 #cloud_colour       = (255, 205, 225)
 goal_x = random.randint(700, 950)
-goal_rect = pygame.Rect(goal_x, 350, 20, 50)
 game_over = False
 winner_text = ""
 
@@ -27,12 +26,18 @@ winner_text = ""
 pygame.init()                                           # Initialize pygame
 screen = pygame.display.set_mode((width, height))       # Create window / screen
 pygame.display.set_caption(caption)                     # Add caption to window
+
+
 BASE_DIR = os.path.dirname(__file__)
 background_image = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()
 background_image = pygame.transform.smoothscale(background_image, (width, height))
 bg_width = background_image.get_width()
-
 bg_height = background_image.get_height()
+
+goal_image = pygame.image.load(os.path.join(BASE_DIR, "images", "goal.png")).convert_alpha()
+goal_image = pygame.transform.scale(goal_image, (50, 150))
+goal_rect = goal_image.get_rect(topleft=(goal_x, 400 - 150))
+
 font = pygame.font.SysFont(None, 72)
 TEXT_COLOR = (255, 255, 255)
 
@@ -51,9 +56,11 @@ def base_frame():
 
     for x in range(-bg_width, width + bg_width, bg_width):
         screen.blit(background_image, (x + offset_x, 0))
-
+        
     pygame.draw.rect(screen, platform_colour, (0, 400, 1000, 100))
-    pygame.draw.rect(screen, (255, 0, 0), camera.apply(goal_rect))
+
+    screen.blit(goal_image, camera.apply(goal_rect))
+    
 
 
 """ Collect events """
@@ -72,6 +79,7 @@ clock = pygame.time.Clock()                 # Pygame's clock, fairly accurate ti
 """ keep game open until player wins/loses """
 running = True
 while running:
+    
     delta = clock.tick(60) / 1000                   # The frame is at most updated 60 times per second
     running, keys = check_events()                  # Get the running state and keys pressed
     

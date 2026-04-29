@@ -18,8 +18,8 @@ field = Field()
 from player import Player
 player = Player()
 
+
 from camera import Camera
-camera = Camera(1000, 500)
 
 player.set_initial_spawn(field)
 
@@ -37,14 +37,21 @@ TEXT_FONT           = "consolas"                            # Type of font
 TEXT_WIN            = "You won!"                            # Game state messages
 TEXT_LOSE           = "Maybe try again..."
 TEXT_FUNCTIONS      = "Press r to reset and q to quit"      # Instructions message
+SCREEN_WIDTH        = 1000
+SCREEN_HEIGHT       = 500
+WORLD_WIDTH         = 5000
+W0RLD_HEIGHT        = 500
 
 
 # -----------------
 # CREATE WINDOW
 # -----------------
 pygame.init()                                           # Initialize pygame
-screen = pygame.display.set_mode((width, height))       # Create screen
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))     # Create screen
 pygame.display.set_caption(caption)                     # Add caption to window
+
+camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_WIDTH, W0RLD_HEIGHT)
+
 
 
 # -----------------
@@ -68,7 +75,7 @@ bg_width = background_image.get_width()
 # GOAL
 # -----------------
 def reset_goal():       # Function to reset goal for randomization
-    goal_x = random.randint(700, 980) 
+    goal_x = random.randint(0, 980) 
     goal_y = 400 - 250
     return pygame.Rect(goal_x, goal_y, 75, 225) 
 goal_rect = reset_goal()        # Create the goal  
@@ -80,7 +87,6 @@ goal_image = pygame.transform.scale(goal_image, (75, 225))
 # BASE FRAME
 # -----------------
 def base_frame():                           # Frame where the world is
-    screen.fill(background_colour)          # Fill the screen with colour
     
     offset_x = -camera.camera.x % bg_width       # Define the cameras offset
 

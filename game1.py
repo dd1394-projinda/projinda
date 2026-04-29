@@ -15,8 +15,8 @@ import os
 caption             = "Platform game"       # Window name
 background_colour   = (224, 247, 250)       # Amount of red, green, blue (255 is max, 0 is no color)
 platform_colour     = (20, 30, 80)       
-goal_x = random.randint(700, 950)
-game_over = False
+goal_x = random.randint(700, 950)   # sätter ut målet på random position
+game_over = False                   #Vid spelets start är booleanvariabeln game_over sätt till false
 winner_text = ""
 
 
@@ -25,14 +25,14 @@ pygame.init()                                           # Initialize pygame
 screen = pygame.display.set_mode((width, height))       # Create window / screen
 pygame.display.set_caption(caption)                     # Add caption to window
 BASE_DIR = os.path.dirname(__file__)
-background_image = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()
-background_image = pygame.transform.smoothscale(background_image, (width, height))
-bg_width = background_image.get_width()
+background_image = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()      #ladda bgbild
+background_image = pygame.transform.smoothscale(background_image, (width, height))              # skala om den till skärmens storlek
+bg_width = background_image.get_width()                                                         
 bg_height = background_image.get_height()
 
-goal_image = pygame.image.load(os.path.join(BASE_DIR, "images", "goal.png")).convert_alpha()
-goal_image = pygame.transform.scale(goal_image, (50, 150))
-goal_rect = goal_image.get_rect(topleft=(goal_x, 400 - 150))
+goal_image = pygame.image.load(os.path.join(BASE_DIR, "images", "goal.png")).convert_alpha()    #ladda in målgrafik
+goal_image = pygame.transform.scale(goal_image, (50, 150))                                      #skala om till rätt storlek
+goal_rect = goal_image.get_rect(topleft=(goal_x, 400 - 150))                                    #gör en rect
 
 font = pygame.font.SysFont(None, 72)
 TEXT_COLOR = (255, 255, 255)
@@ -51,13 +51,13 @@ field = Field()
 """ Base frame """
 def base_frame():
         # horizontal scroll based on camera
-    offset_x = camera.camera.x % bg_width
+    offset_x = camera.camera.x % bg_width 
 
-    for x in range(-bg_width, width + bg_width, bg_width):
-        screen.blit(background_image, (x + offset_x, 0))
+    for x in range(-bg_width, width + bg_width, bg_width): #gör så att bakgrunden scrollar när spelaren rör på sig
+        screen.blit(background_image, (x + offset_x, 0)) 
 
-    pygame.draw.rect(screen, platform_colour, (0, 400, 1000, 100))
-    screen.blit(goal_image, camera.apply(goal_rect))
+    pygame.draw.rect(screen, platform_colour, (0, 400, 1000, 100)) 
+    screen.blit(goal_image, camera.apply(goal_rect)) #stoppa in målet!
 
 
 """ Collect events """
@@ -81,16 +81,16 @@ while running:
     
     base_frame()                # Clean the frame / remove the players previous position
     
-    camera.update(player)
+    camera.update(player)       #kameran följer efter spelaren
     
     if not game_over:
         player.update(keys, delta, field)
         
-        if player.rect.colliderect(goal_rect): #hur spelet avslutas, hur spelaren vinner
+        if player.rect.colliderect(goal_rect): #hur spelet avslutas. om man krockar med mål vinner man! 
             game_over = True
             winner_text = "YOU WIN! :-D"
             
-            base_frame()
+            base_frame()                        
             screen.blit(player.image, camera.apply(player.rect))
 
             game_over_text = font.render(winner_text, True, TEXT_COLOR)
@@ -98,7 +98,7 @@ while running:
                                         height // 2 - game_over_text.get_height() // 2))
 
             pygame.display.update()
-            time.sleep(1) #så att spelet inte stängs på en gång
+            time.sleep(1) #så att spelet inte stängs på en gång. lite hodge podge lösning men yeah
             running = False
             
     screen.blit(player.image, camera.apply(player.rect))

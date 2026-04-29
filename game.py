@@ -5,6 +5,7 @@ Game: open window, game loop, get tangent input
 
 # Import pygame for graphics and game functions
 import pygame
+import sys 
 
 
 """ Window properties """

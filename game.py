@@ -53,9 +53,9 @@ def base_frame():
     pygame.draw.rect(screen, platform_colour, (100,350,50,50))
 
 
-""" Ground """
-from playingField import PlayingField
-field = PlayingField()
+# Field import
+from field import Field
+field = Field()
 
 
 """ Collect events """
@@ -82,7 +82,6 @@ clock = pygame.time.Clock()                 # Pygame's clock, fairly accurate ti
 """ keep game open until player wins/loses """
 running = True
 state = GameState.PLAYING
-field = PlayingField()
 while running:
     delta = clock.tick(60) / 1000                   # The frame is at most updated 60 times per second
     running, keys = check_events()                  # Get the running state and keys pressed
@@ -90,9 +89,7 @@ while running:
     base_frame()                # Clean the frame / remove the players previous position
     
     if state == GameState.PLAYING:
-        x = player.get_current_position()
-        ground = field.get_ground(x)
-        player.update(keys,delta,ground)
+        player.update(keys,delta,field)
         if player.rect.colliderect(goal_rect):
             state = GameState.WON
         if player.rect.colliderect(enemy_rect):
@@ -119,4 +116,3 @@ while running:
     pygame.display.update()     # Update display / screen
     
     
-

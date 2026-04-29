@@ -47,7 +47,7 @@ class Player(pygame.sprite.Sprite):
 
         self.rect               = self.image.get_rect()
         self.rect.x             = 450
-        self.rect.bottom        = 400 #inte ramla genom golvet
+        self.rect.bottom        = 400 
 
         self.x      = float(self.rect.x) #prevents choppy movement
         self.y      = float(self.rect.y) #prevents choppy movement
@@ -69,6 +69,7 @@ class Player(pygame.sprite.Sprite):
         ground (int | float): Y-position för marknivå.
         """
 
+    """
     # Current position
     def get_current_position(self):
         left = self.rect.left
@@ -76,7 +77,8 @@ class Player(pygame.sprite.Sprite):
         right = self.rect.right
         samples = [left, center, right]
         return samples
-
+    """
+    
     # --------------
     # Reset methods
     # --------------
@@ -90,7 +92,7 @@ class Player(pygame.sprite.Sprite):
         self.reset()
     
     def reset(self):
-        self.y = 400
+        self.y = 350
         self.vx = 0
         self.vy = 0
         self.on_ground = True
@@ -104,10 +106,10 @@ class Player(pygame.sprite.Sprite):
     # Main update Loop
     # ----------------
 
-    def update(self, keys, delta, ground): ##kanske lägg typ "levels", "ground", "platforms". alltså ett sätt för spelaren att se om den är på marken eller inte
-        self.handle_input(keys)
+    def update(self, keys, delta, field): ##kanske lägg typ "levels", "ground", "platforms". alltså ett sätt för spelaren att se om den är på marken eller inte
+        self.handle_input(keys, field)
         self.apply_gravity(delta)
-        self.move(delta, ground)
+        self.move(delta, field)
         #self.set_state()
         #self.animate(delta)
         
@@ -123,16 +125,50 @@ class Player(pygame.sprite.Sprite):
     # Input
     # --------------
         
-    def handle_input(self, keys):
+    def handle_input(self, keys, field):
         self.vx = 0
 
-        if keys[pygame.K_a]: self.vx = -self.speed
-        if keys[pygame.K_d]: self.vx = self.speed 
-        if keys[pygame.K_a] and keys[pygame.K_d]: self.vx = 0 
+        left = self.rect.left
+        right = self.rect.right
+        top = self.rect.top
+        bottom = self.rect.bottom
+
+        if keys[pygame.K_a] and not keys[pygame.K_d]: 
+            blocked = False
+            x = left-1
+            for y in (top, self.rect.centery, bottom -5):
+                if field.is_solid(x,y):
+                    blocked = True
+                    break
+            if not blocked:
+                self.vx = -self.speed
+
+        if keys[pygame.K_d] and not keys[pygame.K_a]: 
+            blocked = False
+            x = right+1
+            for y in (top, self.rect.centery, bottom -5):
+                if field.is_solid(x,y):
+                    blocked = True
+                    break
+            if not blocked:
+                self.vx = self.speed 
+    
         if keys[pygame.K_SPACE] and self.on_ground:
             self.vy = -self.jump_strength
             self.on_ground = False
-            
+
+    def is_on_ground(self, field):
+        bottom = self.rect.bottom
+        left = self.rect.left
+        center = self.rect.centerx
+        right = self.rect.right
+
+        for x in (left, center, right):
+            if field.is_solid(x, bottom+1):
+                return True
+        
+        return False
+
     # -----------
     # Movement
     # -----------
@@ -145,23 +181,31 @@ class Player(pygame.sprite.Sprite):
         delta (float): Tid sedan föregående frame.
         ground (int | float): Y-position för marknivå. BEHÖVER LÄGGAS TILL I GAME.PY
      """   
-    def move(self, delta, ground):
-       # Horizontal movement
-       self.x += self.vx * delta
-       self.rect.x = int(self.x)
+    def move(self, delta, field):
+        # Horizontal movement
+        self.x += self.vx * delta
+        self.rect.x = int(self.x)
 
-       # Vertical movement
-       self.y += self.vy * delta
-       self.rect.y = int(self.y)
-       
-       # Ground collision
-       if self.rect.bottom >= ground: 
-           self.rect.bottom = ground
-           self.y = float(self.rect.y)
-           self.vy = 0
-           self.on_ground = True
-       else:
-           self.on_ground = False
+        # Vertical movement
+        old_bottom = self.rect.bottom
+
+        self.y += self.vy * delta
+        self.rect.y = int(self.y)
+        
+        # Ground collision
+        tile_size = 50
+        if self.vy >= 0:
+            for x in (self.rect.left, self.rect.centerx, self.rect.right):
+                if field.is_solid(x, self.rect.bottom):
+                    tile_y = (self.rect.bottom // tile_size) * tile_size
+                    if old_bottom <= tile_y:
+                        self.rect.bottom = (self.rect.bottom // 50) * 50
+                        self.y = float(self.rect.y)
+                        self.vy = 0
+                        self.on_ground = True
+                        return
+            
+        self.on_ground = False
     
     # --------
     # Gravity

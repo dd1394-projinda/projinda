@@ -69,6 +69,14 @@ class Player(pygame.sprite.Sprite):
         ground (int | float): Y-position för marknivå.
         """
 
+    # Current position
+    def get_current_position(self):
+        left = self.rect.left
+        center = self.rect.centerx
+        right = self.rect.right
+        samples = [left, center, right]
+        return samples
+
     # --------------
     # Reset methods
     # --------------

@@ -19,10 +19,14 @@ player_colour       = (200, 170, 230)
 #cloud_colour       = (255, 205, 225)
 
 
+""" Goal """
+def create_goal():
+    goal_x              = random.randint(700, 980)
+    return pygame.Rect(goal_x, 0, 20, 400) 
+goal_rect = create_goal()
+
 """ Object properties """
-goal_x              = random.randint(700, 980)
-goal_rect           = pygame.Rect(goal_x, 0, 20, 400)
-enemy_rect          = pygame.Rect(200, 350, 50, 50)
+enemy_rect          = pygame.Rect(300, 365, 35, 35)
 
 
 """ Create window """
@@ -44,9 +48,14 @@ def base_frame():
 
     pygame.draw.rect(screen, platform_colour, (0, 400, 1000, 100))              # draw block (x,y,width,height), x,y is top left corner (0,0) increases to bottom right corner
     pygame.draw.rect(screen, (255,0,0), enemy_rect)
-    pygame.draw.rect(screen, (0, 255, 0), goal_rect) ##målet, där spelaren går för att vinna
+    pygame.draw.rect(screen, (0, 255, 0), goal_rect)                            # målet, där spelaren går för att vinna
+
+    pygame.draw.rect(screen, platform_colour, (100,350,50,50))
 
 
+""" Ground """
+from playingField import PlayingField
+field = PlayingField()
 
 
 """ Collect events """
@@ -73,6 +82,7 @@ clock = pygame.time.Clock()                 # Pygame's clock, fairly accurate ti
 """ keep game open until player wins/loses """
 running = True
 state = GameState.PLAYING
+field = PlayingField()
 while running:
     delta = clock.tick(60) / 1000                   # The frame is at most updated 60 times per second
     running, keys = check_events()                  # Get the running state and keys pressed
@@ -80,7 +90,8 @@ while running:
     base_frame()                # Clean the frame / remove the players previous position
     
     if state == GameState.PLAYING:
-        ground = 400
+        x = player.get_current_position()
+        ground = field.get_ground(x)
         player.update(keys,delta,ground)
         if player.rect.colliderect(goal_rect):
             state = GameState.WON
@@ -100,6 +111,7 @@ while running:
         screen.blit(text,(100,100))
         if keys[pygame.K_r]: 
             player.reset_after_win()
+            goal_rect = create_goal()
             state = GameState.PLAYING
         elif keys[pygame.K_q]: running = False
 

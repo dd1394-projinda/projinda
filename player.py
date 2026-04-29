@@ -69,15 +69,6 @@ class Player(pygame.sprite.Sprite):
         ground (int | float): Y-position för marknivå.
         """
 
-    """
-    # Current position
-    def get_current_position(self):
-        left = self.rect.left
-        center = self.rect.centerx
-        right = self.rect.right
-        samples = [left, center, right]
-        return samples
-    """
     
     # --------------
     # Reset methods
@@ -129,46 +120,22 @@ class Player(pygame.sprite.Sprite):
     def handle_input(self, keys, field):
         self.vx = 0
 
-        left = self.rect.left
-        right = self.rect.right
-        top = self.rect.top
-        bottom = self.rect.bottom
-
         if keys[pygame.K_a] and not keys[pygame.K_d]: 
-            blocked = False
-            x = left-1
-            for y in (top, self.rect.centery, bottom -5):
-                if field.is_solid(x,y):
-                    blocked = True
-                    break
-            if not blocked:
-                self.vx = -self.speed
+            self.vx = -self.speed
 
         if keys[pygame.K_d] and not keys[pygame.K_a]: 
-            blocked = False
-            x = right+1
-            for y in (top, self.rect.centery, bottom -5):
-                if field.is_solid(x,y):
-                    blocked = True
-                    break
-            if not blocked:
-                self.vx = self.speed 
+            self.vx = self.speed 
     
         if keys[pygame.K_SPACE] and self.on_ground:
             self.vy = -self.jump_strength
             self.on_ground = False
 
     def is_on_ground(self, field):
-        bottom = self.rect.bottom
-        left = self.rect.left
-        center = self.rect.centerx
-        right = self.rect.right
+        self.rect.y += 1
+        grounded = field.is_solid(self.rect)
+        self.rect.y -= 1
+        return grounded
 
-        for x in (left, center, right):
-            if field.is_solid(x, bottom+1):
-                return True
-        
-        return False
 
     # -----------
     # Movement
@@ -187,27 +154,33 @@ class Player(pygame.sprite.Sprite):
         self.x += self.vx * delta
         self.rect.x = int(self.x)
 
+        for p in field.platforms:
+            if self.rect.colliderect(p):
+                if self.vx > 0:
+                    self.rect.right = p.left
+                elif self.vx < 0:
+                    self.rect.left = p.right
+                self.x = self.rect.x
+
         # Vertical movement
-        old_bottom = self.rect.bottom
+        #old_bottom = self.rect.bottom
 
         self.y += self.vy * delta
         self.rect.y = int(self.y)
         
-        # Ground collision
-        tile_size = 50
-        if self.vy >= 0:
-            for x in (self.rect.left, self.rect.centerx, self.rect.right):
-                if field.is_solid(x, self.rect.bottom):
-                    tile_y = (self.rect.bottom // tile_size) * tile_size
-                    if old_bottom <= tile_y:
-                        self.rect.bottom = (self.rect.bottom // 50) * 50
-                        self.y = float(self.rect.y)
-                        self.vy = 0
-                        self.on_ground = True
-                        return
-            
         self.on_ground = False
-    
+
+        for p in field.platforms:
+            if self.rect.colliderect(p):
+                if self.vy > 0:
+                    self.rect.bottom = p.top
+                    self.vy = 0
+                    self.on_ground = True
+                elif self.vy < 0:
+                    self.rect.top = p.bottom
+                    self.vy = 0
+                self.y = self.rect.y
+        
     # --------
     # Gravity
     # --------

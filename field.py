@@ -2,12 +2,15 @@
 # field
 #
 
+import pygame
+pygame.init()
+
 
 class Field(): 
     def __init__(self):
         self.WIDTH = 20
         self.blocks = [[] for _ in range(self.WIDTH)]
-
+        self.platforms = []
         self.build_world()
 
     def build_world(self):
@@ -15,10 +18,16 @@ class Field():
         self.add_platform(2,3,350,400)
 
     def add_platform(self, x_start, x_end, y_start, y_end):
-            for x in range(x_start, x_end):
-                self.blocks[x].append((y_start,y_end))
+        for x in range(x_start, x_end):
+            self.platforms.append(pygame.Rect(x*50, y_start, 50, y_end)
+            )
+            self.blocks[x].append((y_start,y_end))
 
-    def is_solid(self, x, y):
+    def is_solid(self, rect):
+        return any(rect.colliderect(p) for p in self.platforms)
+    
+
+    def is_solid2(self, x, y):
         x = int(x // 50)
         y = int(y // 50)
 

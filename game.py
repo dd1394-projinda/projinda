@@ -1,10 +1,5 @@
 """ 
-
-Game file
-__open window
-__game loop
-__tangent input
-
+Game: open window, game loop, get tangent input
 """
 
 
@@ -12,18 +7,19 @@ __tangent input
 import pygame
 import sys 
 import random
-
+import time
+import os
 
 """ Window properties """
 (width, height)     = (1000, 500)           # Size of window
 caption             = "Platform game"       # Window name
 background_colour   = (224, 247, 250)       # Amount of red, green, blue (255 is max, 0 is no color)
-platform_colour     = (230, 180, 200)       
-player_colour       = (200, 170, 230)
+platform_colour     = (0, 0, 0)       
 #dirt_colour        = (205, 175, 140)
 #cloud_colour       = (255, 205, 225)
 goal_x = random.randint(700, 950)
-goal_rect = pygame.Rect(goal_x, 350, 20, 50)
+game_over = False
+winner_text = ""
 
 
 """ Create window """
@@ -32,15 +28,39 @@ screen = pygame.display.set_mode((width, height))       # Create window / screen
 pygame.display.set_caption(caption)                     # Add caption to window
 
 
+BASE_DIR = os.path.dirname(__file__)
+background_image = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()
+background_image = pygame.transform.smoothscale(background_image, (width, height))
+bg_width = background_image.get_width()
+bg_height = background_image.get_height()
+
+goal_image = pygame.image.load(os.path.join(BASE_DIR, "images", "goal.png")).convert_alpha()
+goal_image = pygame.transform.scale(goal_image, (50, 150))
+goal_rect = goal_image.get_rect(topleft=(goal_x, 400 - 150))
+
+font = pygame.font.SysFont(None, 72)
+TEXT_COLOR = (255, 255, 255)
+
+# Extend player class, create object / player, camera
+from player import Player
+player = Player()
+
+from camera import Camera
+camera = Camera(1000, 500)
+
+
 """ Base frame """
 def base_frame():
-    screen.fill(background_colour)                      # Fill the screen with colour
+        # horizontal scroll based on camera
+    offset_x = camera.camera.x % bg_width
 
-    # draw block (x,y,width,height), x,y is top left corner (0,0) increases to bottom right corner
+    for x in range(-bg_width, width + bg_width, bg_width):
+        screen.blit(background_image, (x + offset_x, 0))
+        
     pygame.draw.rect(screen, platform_colour, (0, 400, 1000, 100))
-    #pygame.draw.rect(screen, dirt_colour, (0,430,1000,70))
+
+    screen.blit(goal_image, camera.apply(goal_rect))
     
-    pygame.draw.rect(screen, (255, 0, 0), goal_rect) ##målet, där spelaren går för att vinna
 
 
 """ Collect events """
@@ -52,38 +72,58 @@ def check_events():
     return True, keys                       # Otherwise keep window open, always return keys
 
 
-""" Falsified player, made in place for game loop logic """
-class Player():                             # Seperate class for simplicity, easier to change and keeps game base and player seperate
-    def __init__(player, x, screen):        # Initialize, parameters x coordinate and screen
-        player.screen = screen              # Player is on the previously created screen
-        player.x = x                        # Player's x coordinate is defined
-    def show(player):                       # Function to show the player on the screen
-        pygame.draw.rect(screen, player_colour, (player.x,340,60,60))       # Player is a rectangle, only varying value is currently x-position
-x = 470                                     # Where the ground begins
-player = Player(x, screen)                  # Create the player
-player_speed = 200                          # Pixels per second, that the player can move
-
-
 """ Clock """
 clock = pygame.time.Clock()                 # Pygame's clock, fairly accurate timing, to use for the game loop
 
 
-""" Keep window open until user closes it """
+""" keep game open until player wins/loses """
 running = True
 while running:
-    dt = clock.tick(60)                             # The frame is at most updated 60 times per second
-    running, keys = check_events()                  # Get the running state and keys pressed
-
-    ground = 400
-    player.update(keys, delta, ground)
     
-    if player.rect.colliderect(goal_rect):
-        print("You win!")
-        running = False
-
+    delta = clock.tick(60) / 1000                   # The frame is at most updated 60 times per second
+    running, keys = check_events()                  # Get the running state and keys pressed
+    
     base_frame()                # Clean the frame / remove the players previous position
-    screen.blit(player.image, player.rect)
+    
+    camera.update(player)
+    
+    if not game_over:
+        ground = 400
+        player.update(keys, delta, ground)
+        
+        if player.rect.colliderect(goal_rect): #hur spelet avslutas, hur spelaren vinner
+            game_over = True
+            winner_text = "YOU WIN! :-D"
+            
+            base_frame()
+            screen.blit(player.image, camera.apply(player.rect))
+
+            game_over_text = font.render(winner_text, True, TEXT_COLOR)
+            screen.blit(game_over_text, (width // 2 - game_over_text.get_width() // 2,
+                                        height // 2 - game_over_text.get_height() // 2))
+
+            pygame.display.update()
+            time.sleep(1) #så att spelet inte stängs på en gång
+            running = False
+            
+    screen.blit(player.image, camera.apply(player.rect))
+
+    if game_over:
+        game_over_text = font.render(winner_text, True, TEXT_COLOR)
+        screen.blit(game_over_text, (width // 2 - game_over_text.get_width() // 2,
+                                     height // 2 - game_over_text.get_height() // 2))
+                                     
+  
     pygame.display.update()     # Update display / screen
     
+    
+
+  
+
+
+    
+   
+        
+        
     
 

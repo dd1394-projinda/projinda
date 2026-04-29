@@ -82,7 +82,7 @@ goal_image = pygame.transform.scale(goal_image, (75, 225))
 def base_frame():                           # Frame where the world is
     screen.fill(background_colour)          # Fill the screen with colour
     
-    offset_x = camera.camera.x % bg_width       # Define the cameras offset
+    offset_x = -camera.camera.x % bg_width       # Define the cameras offset
 
     for x in range(-bg_width, width + bg_width, bg_width):      # Gör så att bakgrunden scrollar när spelaren rör på sig
         screen.blit(background_image, (x + offset_x, 0))        # Paint it onto the screen

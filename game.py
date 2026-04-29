@@ -7,6 +7,7 @@ Game: open window, game loop, get tangent input
 import pygame
 import sys 
 import random
+import time
 
 
 """ Window properties """
@@ -31,9 +32,12 @@ font = pygame.font.SysFont(None, 72)
 TEXT_COLOR = (0, 0, 0)
 
 
-# Extend player class, create object / player
+# Extend player class, create object / player, camera
 from player import Player
 player = Player()
+
+from camera import Camera
+camera = Camera(1000, 500)
 
 
 """ Base frame """
@@ -44,7 +48,7 @@ def base_frame():
     pygame.draw.rect(screen, platform_colour, (0, 400, 1000, 100))
     #pygame.draw.rect(screen, dirt_colour, (0,430,1000,70))
     
-    pygame.draw.rect(screen, (255, 0, 0), goal_rect) ##målet, där spelaren går för att vinna
+    pygame.draw.rect(screen, (255, 0, 0), camera.apply(goal_rect)) ##målet, där spelaren går för att vinna
 
 
 """ Collect events """
@@ -68,16 +72,28 @@ while running:
     
     base_frame()                # Clean the frame / remove the players previous position
     
+    camera.update(player)
+    
     if not game_over:
         ground = 400
         player.update(keys, delta, ground)
         
-        if player.rect.colliderect(goal_rect): #win condition
+        if player.rect.colliderect(goal_rect): #hur spelet avslutas, hur spelaren vinner
             game_over = True
             winner_text = "YOU WIN! :-D"
+            
+            base_frame()
+            screen.blit(player.image, camera.apply(player.rect))
+
+            game_over_text = font.render(winner_text, True, TEXT_COLOR)
+            screen.blit(game_over_text, (width // 2 - game_over_text.get_width() // 2,
+                                        height // 2 - game_over_text.get_height() // 2))
+
+            pygame.display.update()
+            time.sleep(1) #så att spelet inte stängs på en gång
             running = False
             
-    screen.blit(player.image, player.rect)
+    screen.blit(player.image, camera.apply(player.rect))
 
     if game_over:
         game_over_text = font.render(winner_text, True, TEXT_COLOR)

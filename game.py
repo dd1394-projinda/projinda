@@ -75,8 +75,14 @@ bg_width = background_image.get_width()
 # GOAL
 # -----------------
 def reset_goal():       # Function to reset goal for randomization
-    goal_x = random.randint(0, WORLD_WIDTH - 75)
-    goal_y = 400 - 250
+    goal_x = random.randint(0, 1)
+    if goal_x == 0:
+        goal_x = 15
+    else: 
+        goal_x = 9985
+    
+    goal_y = 400 - 250 
+    
     return pygame.Rect(goal_x, goal_y, 75, 225) 
 goal_rect = reset_goal()        # Create the goal  
 goal_image = pygame.image.load(os.path.join(BASE_DIR, "images", "goal.png")).convert_alpha()    # Ladda in målgrafik
@@ -147,39 +153,47 @@ while running:      # Game loop keeps the window and game going
     delta = clock.tick(60) / 1000        # The frame is at most updated 60 times per second
     running, keys = check_events()       # Get the running state and keys pressed
         
-    camera.update(player)       # Kameran följer efter spelaren
-    base_frame()                # Clean frame
 
     if state == GameState.PLAYING:                  # Determine current game state
         player.update(keys,delta,field)             # Update player position
+        
         if player.rect.colliderect(goal_rect):      # If contact with goal -> win
             state = GameState.WON
+       
         if field.is_enemy(player.rect):             # If contact with enemy block -> lose
             state = GameState.LOST
 
     elif state == GameState.LOST:
-        text = font.render(TEXT_LOSE, True, TEXT_COLOR)                         # Render text
-        instructions = small_font.render(TEXT_FUNCTIONS, True, TEXT_COLOR)      
-        screen.blit(text,(100,100))                                             # Paint the text on the screen
-        screen.blit(instructions,(100,200))
         if keys[pygame.K_r] and not keys[pygame.K_d]:           # Tanget input handle for reset and quit
             player.reset_after_death()              # Reset function in player, specific for certain game outcomes
             state = GameState.PLAYING               # To keep going after reset  
         elif keys[pygame.K_q]: running = False      # Closes the window immediatly
 
     elif state == GameState.WON:
-        text = font.render(TEXT_WIN, True, TEXT_COLOR)
-        instructions = small_font.render(TEXT_FUNCTIONS, True, TEXT_COLOR)
-        screen.blit(text,(100,100))
-        screen.blit(instructions,(100,200))
         if keys[pygame.K_r]: 
             player.reset_after_win(field)
             goal_rect = reset_goal()
             state = GameState.PLAYING
         elif keys[pygame.K_q]: running = False
-
+        
+    camera.update(player)       # Kameran följer efter spelaren
+    base_frame()                # Clean frame
+    
     player_screen_rect = player.rect.move(-camera.camera.x, -camera.camera.y)       # Move player
     screen.blit(player.image, player_screen_rect)                                   # Paint player corresponding to it's environment
+
+    if state == GameState.LOST:
+        text = font.render(TEXT_LOSE, True, TEXT_COLOR)                         # Render text
+        instructions = small_font.render(TEXT_FUNCTIONS, True, TEXT_COLOR)      
+        screen.blit(text,(100,100))                                             # Paint the text on the screen
+        screen.blit(instructions,(100,200))
+        
+    elif state == GameState.WON:
+        text = font.render(TEXT_WIN, True, TEXT_COLOR)
+        instructions = small_font.render(TEXT_FUNCTIONS, True, TEXT_COLOR)
+        screen.blit(text,(100,100))
+        screen.blit(instructions,(100,200))
+        
     pygame.display.update()     # Update screen
     
     

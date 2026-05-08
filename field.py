@@ -56,7 +56,7 @@ class Field():
         self.add_platform(0,    1,      300,    50)
         
         # Enemies
-        self.add_enemy(400,     365,    35,     35)
+        self.add_enemy(400,     250,    35,     35)
 
 
     # ----------------- 

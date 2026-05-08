@@ -75,8 +75,14 @@ bg_width = background_image.get_width()
 # GOAL
 # -----------------
 def reset_goal():       # Function to reset goal for randomization
-    goal_x = random.randint(0, WORLD_WIDTH - 75)
-    goal_y = 400 - 250
+    goal_x = random.randint(0, 1)
+    if goal_x == 0:
+        goal_x = 15
+    else: 
+        goal_x = 9985
+    
+    goal_y = 400 - 250 
+    
     return pygame.Rect(goal_x, goal_y, 75, 225) 
 goal_rect = reset_goal()        # Create the goal  
 goal_image = pygame.image.load(os.path.join(BASE_DIR, "images", "goal.png")).convert_alpha()    # Ladda in målgrafik

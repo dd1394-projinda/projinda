@@ -59,7 +59,7 @@ class Player(pygame.sprite.Sprite):
 
         self.rect               = self.image.get_rect()
         self.rect.x             = 450
-        self.rect.bottom        = 400 
+        self.rect.bottom        = 0
 
         self.x      = float(self.rect.x)    # Prevents choppy movement
         self.y      = float(self.rect.y)    # Prevents choppy movement

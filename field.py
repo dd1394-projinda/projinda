@@ -5,8 +5,8 @@
 import pygame
 import random
 
-TILE = 50
-CORNER = 10
+TILE = 100
+CORNER = 5
 
 class Field(): 
     def __init__(self,world_width, world_height):
@@ -35,13 +35,28 @@ class Field():
         self.add_platform(a+2,            self.world_end,    400,    100)""" #jag bara testar lite grejer
         
         
-        heights = [500, 400, 300]        
+        heights = [500, 400, 350, 300, 250]        
 
+        previous_y = 400
+        fall_count = 0
         for block in range(self.world_begin, self.world_end):
-            y = random.choice(heights)
+            y = 400
+            if fall_count > 0:
+                y = 500
+                fall_count -= 1
+            else:
+                if previous_y == 500:
+                    y = random.choice(heights[1:])
+                
+                else:
+                    y = random.choice(heights)
+                    if y == 500:
+                        fall_lengh = random.randint(1,2)
+                        fall_count = fall_lengh -1
+            previous_y = y
             
-            self.platforms.append(pygame.Rect(block * TILE, y, TILE, self.world_height - y)) ##needs some work
-
+            self.add_platform(block, block+1, y, self.world_height - y)
+            #self.platforms.append(pygame.Rect(block * TILE, y, TILE, self.world_height - y)) ##needs some work
         
 
         # Fall
@@ -51,6 +66,11 @@ class Field():
         self.add_platform(self.world_begin - CORNER,     self.world_begin,        50,   500)
         self.add_platform(self.world_end,                self.world_end + CORNER,    50,   500)
         
+        # Goal platforms
+        self.add_platform(self.world_begin, 2, 400,100)
+        self.add_platform(self.world_end - 2, self.world_end, 400,100)
+
+        """
         # Platforms
         self.add_platform(0,    2,      350,    50)
         self.add_platform(0,    1,      300,    50)
@@ -77,7 +97,7 @@ class Field():
         # Block wise, so each block is 50x50
         # -----------------
         for x in range(x_start, x_end):
-            self.platforms.append(pygame.Rect(x*50, y, 50, h))
+            self.platforms.append(pygame.Rect(x*TILE, y, TILE, h))
 
 
     # -----------------

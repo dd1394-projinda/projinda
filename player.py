@@ -3,6 +3,7 @@
 # -----------------
 
 
+
 import pygame
 import spritesheet
 import os
@@ -65,6 +66,7 @@ class Player(pygame.sprite.Sprite):
         self.on_ground = False
 
         self.spawn = None
+        
         """
             
             ### TEMPORARY
@@ -87,17 +89,17 @@ class Player(pygame.sprite.Sprite):
         self.gravity        = 1900
         self.on_ground      = False
 
-        self.spawn          = None"""
+        self.spawn          = None
+        """
     
 
     # -----------------
     # SPAWN METHODS
     # -----------------
-    """ CAN'T GET RANDOM SPAWN TO WORK PROPERLY """
     def get_spawn(self, field):
         attempts = 50
         for _ in range(attempts):
-            x = random.randint(200, 800)        # Horizontal range
+            x = random.randint(2200, 2800)        # Horizontal range
             y = 100                             # Fixed spawn height
 
             # Create a rect where the player would spawn
@@ -159,7 +161,8 @@ class Player(pygame.sprite.Sprite):
         """
         """
         self.x, self.y = 600,350
-        self.reset()"""
+        self.reset()
+        """
         
     def reset_after_win(self, field):
         self.spawn_from_sky(random.randint(300, 800))
@@ -167,17 +170,19 @@ class Player(pygame.sprite.Sprite):
         safe_spawn = self.get_spawn(field)
         self.spawn = safe_spawn
         self.x, self.y = self.spawn
+        self.x, self.y = random.randint(300,800), 350
+        self.reset()
+        
         """
 
-        """self.x, self.y = random.randint(300,800), 350
-        self.reset()"""
+        
 
         
     # -----------------
     # MAIN UPDATE LOOP
     # -----------------
-    def update(self, keys, delta, field): ##kanske lägg typ "levels", "ground", "platforms". alltså ett sätt för spelaren att se om den är på marken eller inte
-        # -----------------
+    
+    def update(self, keys, delta, field): 
         # Tolkar key input och uppdaterar spelarens horisontella
         # hastighet samt initierar hopp.
         #

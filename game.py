@@ -79,9 +79,9 @@ bg_width = background_image.get_width()
 def reset_goal():       # Function to reset goal for randomization
     goal_x = random.randint(0, 1)
     if goal_x == 0:
-        goal_x = 15
+        goal_x = 5
     else: 
-        goal_x = 9985
+        goal_x = 4900
     
     goal_y = 400 - 250 
     
@@ -101,14 +101,14 @@ def base_frame():                           # Frame where the world is
     for x in range(-bg_width, SCREEN_WIDTH + bg_width, bg_width):      # Gör så att bakgrunden scrollar när spelaren rör på sig
         screen.blit(background_image, (x + offset_x, 0))        # Paint it onto the screen
 
-    screen.blit(goal_image, goal_rect.move(-camera.camera.x, -camera.camera.y))
-
     for p in field.platforms:       # Blocks are made in field.py, from the list of platforms, paint them all onto the screen
         pygame.draw.rect(
             screen,
             platform_colour,
             p.move(-camera.camera.x, -camera.camera.y)
         )
+
+    screen.blit(goal_image, goal_rect.move(-camera.camera.x, -camera.camera.y))
 
     for e in field.enemies:
         pygame.draw.rect(

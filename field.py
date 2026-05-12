@@ -60,8 +60,7 @@ class Field():
         
 
         # Fall
-        self.add_enemy((self.world_begin - CORNER) * TILE,     500,   (self.world_end + CORNER) * TILE,    500)
-
+        self.add_enemy((self.world_begin - CORNER) * TILE, 500, (self.world_end + CORNER) * TILE, 500)
         # World borders
         self.add_platform(self.world_begin - CORNER,     self.world_begin,        50,   500)
         self.add_platform(self.world_end,                self.world_end + CORNER,    50,   500)
@@ -76,7 +75,7 @@ class Field():
         self.add_platform(0,    1,      300,    50)
         
         # Enemies
-        self.add_enemy(400,     250,    35,     35)
+        self.add_enemy_on_platform(random.randint(4, 12))
 
 
     # ----------------- 
@@ -99,6 +98,18 @@ class Field():
         for x in range(x_start, x_end):
             self.platforms.append(pygame.Rect(x*TILE, y, TILE, h))
 
+    def add_enemy_on_platform(self, block, w = 35, h = 35):
+         x = block * TILE + (TILE - w) // 2
+         
+         for p in self.platforms:
+             if p.left <= x < p.right:
+                y = p.top - h
+                enemy = pygame.Rect(x, y, w, h)
+
+                if not self.is_solid(enemy):
+                    self.enemies.append(enemy)
+                return
+            
 
     # -----------------
     # BLOCK CONTACT

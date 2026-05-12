@@ -29,7 +29,7 @@ class Player(pygame.sprite.Sprite):
         #ground (int | float): Y-position för marknivå.
         # -----------------
 
-        """ 
+    
         BASE_DIR = os.path.dirname(__file__)                    # Initierar spelaren och laddar in animationer för olika states
         ss_walk = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "walk.png"))
         ss_idle = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "idle.png"))
@@ -50,6 +50,21 @@ class Player(pygame.sprite.Sprite):
         self.frame              = 0
         self.animation_speed    = 12
         self.image              = self.animations[self.state][0]
+        
+        self.rect = pygame.Rect(450, -150, 55, 24) #hitbox
+        
+        self.x = float(self.rect.x)
+        self.y = float(self.rect.y)
+        
+        self.vx = 0
+        self.vy = 0
+
+        self.speed = 200
+        self.jump_strength = 900
+        self.gravity = 1900
+        self.on_ground = False
+
+        self.spawn = None
         """
             
             ### TEMPORARY
@@ -72,7 +87,7 @@ class Player(pygame.sprite.Sprite):
         self.gravity        = 1900
         self.on_ground      = False
 
-        self.spawn          = None
+        self.spawn          = None"""
     
 
     # -----------------
@@ -125,7 +140,7 @@ class Player(pygame.sprite.Sprite):
     def reset(self):
         self.vx = 0
         self.vy = 0
-        self.on_ground = True
+        self.on_ground = False
         
         """
         self.state = "idle"
@@ -174,11 +189,9 @@ class Player(pygame.sprite.Sprite):
         self.handle_input(keys, field)
         self.apply_gravity(delta)
         self.move(delta, field)
-        
-        """
         self.set_state()
-        #self.animate(delta)
-        """
+        self.animate(delta)
+  
    
         
     # --------------

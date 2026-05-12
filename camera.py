@@ -25,4 +25,4 @@ class Camera:
         self.camera = pygame.Rect(x, y, self.screen_width, self.screen_height)
 
     def apply(self, rect):
-        return rect.move(-self.camera.x, -self.cameraW0RLD_HEIGHT.y)
+        return rect.move(-self.camera.x, -self.cameraWORLD_HEIGHT.y)

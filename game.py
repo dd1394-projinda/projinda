@@ -16,7 +16,6 @@ from field import Field
 
 
 from player import Player
-player = Player()
 
 
 from camera import Camera
@@ -48,6 +47,9 @@ WORLD_HEIGHT        = 500
 pygame.init()                                           # Initialize pygame
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))     # Create screen
 pygame.display.set_caption(caption)                     # Add caption to window
+
+player = Player() #initiera spelare
+
 
 camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT)
 field = Field(WORLD_WIDTH, WORLD_HEIGHT)
@@ -179,8 +181,8 @@ while running:      # Game loop keeps the window and game going
     camera.update(player)       # Kameran följer efter spelaren
     base_frame()                # Clean frame
     
-    player_screen_rect = player.rect.move(-camera.camera.x, -camera.camera.y)       # Move player
-    screen.blit(player.image, player_screen_rect)                                   # Paint player corresponding to it's environment
+    image_rect = player.image.get_rect(midbottom=player.rect.midbottom)       # Move player
+    screen.blit(player.image, image_rect.move(-camera.camera.x, -camera.camera.y))                                   # Paint player corresponding to it's environment
 
     if state == GameState.LOST:
         text = font.render(TEXT_LOSE, True, TEXT_COLOR)                         # Render text

@@ -163,9 +163,11 @@ while running:      # Game loop keeps the window and game going
             state = GameState.WON
        
         if field.is_enemy(player.rect):             # If contact with enemy block -> lose
+            player.die()
             state = GameState.LOST
 
     elif state == GameState.LOST:
+        player.animate(delta)       #GÖR DÖDANIMATION MEN DEN VAR LOWKEY FUL??
         if keys[pygame.K_r] and not keys[pygame.K_d]:           # Tanget input handle for reset and quit
             player.reset_after_death()              # Reset function in player, specific for certain game outcomes
             state = GameState.PLAYING               # To keep going after reset  

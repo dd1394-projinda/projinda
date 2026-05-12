@@ -36,6 +36,7 @@ class Player(pygame.sprite.Sprite):
         ss_idle = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "idle.png"))
         ss_jump = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "jump.png"))
         ss_run = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "run.png"))
+        ss_dead = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "run.png"))
         
         #kan lägga till död, skadad, spring, attack, etc. många idleanimationer. bilder finns! finns även en röd slime som kan vara fiende?
 
@@ -45,6 +46,7 @@ class Player(pygame.sprite.Sprite):
             "idle": ss_idle.load_strip((0, 0, 128, 128), 8),
             "jump": ss_jump.load_strip((0, 0, 128, 128), 13),
             "run":  ss_run.load_strip((0, 0, 128, 128), 7),
+            "dead": ss_dead.load_strip((0, 0, 128, 128), 3),
         }
         
         self.state              = "idle"
@@ -281,6 +283,11 @@ class Player(pygame.sprite.Sprite):
         # Bestämmer spelarens nuvarande state (idle, walk, jump)
         # baserat på rörelse och om spelaren är på marken.
         # -----------------
+        
+        if self.state == "dead":
+            return
+    
+    
         if not self.on_ground:
             new_state = "jump"
         elif self.vx == 0:
@@ -304,13 +311,22 @@ class Player(pygame.sprite.Sprite):
         self.frame += self.animation_speed * delta
 
         if self.frame >= len(self.animations[self.state]):
-            self.frame = 0
+            if self.state == "dead":
+                self.frame = len(self.animations[self.state]) - 1
+            else:
+                self.frame = 0
 
         self.image = self.animations[self.state][int(self.frame)]
         
     def spawn_from_sky(self, x=None):
+        
         if x is None:
             x = random.randint(300, 800)
+            
+        self.state = "idle"
+        self.frame = 0
+        self.image = self.animations[self.state][0]
+
 
         self.x = float(x)
         self.y = -self.rect.height - 100   # above screen
@@ -321,3 +337,11 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
+        
+        
+    #spelaren dör, triggar död-animation
+    def die(self):
+        self.state = "dead"
+        self.frame = 0
+        self.vx = 0
+        self.vy = 0

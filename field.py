@@ -51,8 +51,8 @@ class Field():
                 else:
                     y = random.choice(heights)
                     if y == 500:
-                        fall_lengh = random.randint(1,2)
-                        fall_count = fall_lengh -1
+                        fall_length = random.randint(1,2)
+                        fall_count = fall_length -1
             previous_y = y
             
             self.add_platform(block, block+1, y, self.world_height - y)

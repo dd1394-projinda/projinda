@@ -70,7 +70,7 @@ class Player(pygame.sprite.Sprite):
         self.speed          = 200
         self.jump_strength  = 800
         self.gravity        = 2000
-        self.on_ground      = True
+        self.on_ground      = False
 
         self.spawn          = None
     
@@ -113,10 +113,7 @@ class Player(pygame.sprite.Sprite):
         return 500, 500     # fallback if no safe spot found
 
     def set_initial_spawn(self, field):
-        if self.spawn is None:
-            self.spawn = self.get_spawn(field)
-        self.x, self.y = self.spawn
-        self.reset()
+        self.spawn_from_sky()
 
 
     # -----------------
@@ -136,24 +133,26 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = int(self.y)
 
     def reset_after_death(self):
+        self.spawn_from_sky()
         """
         if self.spawn is None:
             self.spawn = 600,350    # Fallback, shouldn't happen
         self.x, self.y = self.spawn
         """
-
+        """
         self.x, self.y = 600,350
-        self.reset()
-
+        self.reset()"""
+        
     def reset_after_win(self, field):
+        self.spawn_from_sky(random.randint(300, 800))
         """
         safe_spawn = self.get_spawn(field)
         self.spawn = safe_spawn
         self.x, self.y = self.spawn
         """
 
-        self.x, self.y = random.randint(300,800), 350
-        self.reset()
+        """self.x, self.y = random.randint(300,800), 350
+        self.reset()"""
 
         
     # -----------------
@@ -288,3 +287,16 @@ class Player(pygame.sprite.Sprite):
 
         self.image = self.animations[self.state][int(self.frame)]
         
+    def spawn_from_sky(self, x=None):
+        if x is None:
+            x = random.randint(300, 800)
+
+        self.x = float(x)
+        self.y = -self.rect.height - 100   # above screen
+
+        self.vx = 0
+        self.vy = 0
+        self.on_ground = False
+
+        self.rect.x = int(self.x)
+        self.rect.y = int(self.y)

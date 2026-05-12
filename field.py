@@ -70,7 +70,7 @@ class Field():
         self.add_platform(self.world_begin, 2, 400,100)
         self.add_platform(self.world_end - 2, self.world_end, 400,100)
 
-        """
+        
         # Platforms
         self.add_platform(0,    2,      350,    50)
         self.add_platform(0,    1,      300,    50)

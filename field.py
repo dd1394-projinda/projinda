@@ -35,29 +35,20 @@ class Field():
         self.add_platform(a+2,            self.world_end,    400,    100)""" #jag bara testar lite grejer
         
         
-        heights = [500, 400, 350, 300, 250]        
+        heights = [400, 350, 300, 250]  
+        hole_chance = 0.08      
 
         previous_y = 400
-        fall_count = 0
-        hole_cooldown = 0
+        max_hole_tiles = 2
+        hole_tiles_in_row = 0
         for block in range(self.world_begin, self.world_end):
-            y = 400
-            if fall_count > 0:
+            if hole_tiles_in_row < max_hole_tiles and random.random() < hole_chance:
                 y = 500
-                fall_count -= 1
-                if fall_count == 0:
-                    hole_cooldown = 1
-            elif hole_cooldown > 0:
-                y = random.choice([400, 350, 300, 250])
-                hole_cooldown -= 1
-            
+                hole_tiles_in_row += 1
             else:
                 y = random.choice(heights)
-
-                if y == 500:
-                    fall_length = random.randint(1, 2)
-                    fall_count = fall_length - 1
-            
+                hole_tiles_in_row = 0
+                    
             self.add_platform(block, block + 1, y, self.world_height - y)
             #self.platforms.append(pygame.Rect(block * TILE, y, TILE, self.world_height - y)) ##needs some work
         

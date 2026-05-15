@@ -10,6 +10,8 @@ import os
 import random
 
 
+WORLD_WIDTH = 7000
+
 class Player(pygame.sprite.Sprite): 
 
     # -----------------
@@ -20,7 +22,8 @@ class Player(pygame.sprite.Sprite):
     # -----------------
 
     def __init__(self):
-        
+        super().__init__()
+
         # -----------------
         # Uppdaterar spelarens rörelse och gravitation. animerar spelaren.
          
@@ -54,10 +57,12 @@ class Player(pygame.sprite.Sprite):
         self.animation_speed    = 12
         self.image              = self.animations[self.state][0]
         
+        self.startposition  = (3500.0, 100.0)   # To make them floats for better accuracy
+
         self.rect = pygame.Rect(450, -150, 55, 24) #hitbox
         
-        self.x = float(self.rect.x)
-        self.y = float(self.rect.y)
+        self.x = self.startposition[0]
+        self.y = self.startposition[1]
         
         self.vx = 0
         self.vy = 0
@@ -67,123 +72,26 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 1900
         self.on_ground = False
 
-        self.spawn = None
-        
-        """
-            
-            ### TEMPORARY
-        self.image = pygame.Surface((50,50))
-        self.image.fill((200,170,230))
-
-
-        self.rect               = self.image.get_rect()
-        self.rect.x             = 450
-        self.rect.bottom        = 0
-
-        self.x      = float(self.rect.x)    # Prevents choppy movement
-        self.y      = float(self.rect.y)    # Prevents choppy movement
-        
-        self.vx     = 0
-        self.vy     = 0
-        
-        self.speed          = 200
-        self.jump_strength  = 900
-        self.gravity        = 1900
-        self.on_ground      = False
-
-        self.spawn          = None
-        """
-    
-
-    # -----------------
-    # SPAWN METHODS
-    # -----------------
-    def get_spawn(self, field):
-        attempts = 50
-        for _ in range(attempts):
-            x = random.randint(2200, 2800)        # Horizontal range
-            y = 100                             # Fixed spawn height
-
-            # Create a rect where the player would spawn
-            test_rect = pygame.Rect(x, y, self.rect.width, self.rect.height)
-
-            # 1️ Check if the spawn itself is empty
-            if field.is_solid(test_rect):
-                continue
-
-            # 2 Check if spawn collides with enemy block
-            if any(test_rect.colliderect(e) for e in field.enemies):
-                continue
-
-            # 3 Check if there is a platform below at y >= 400
-            platform_below = None
-            for p in field.platforms:
-                if x + self.rect.width > p.left and x < p.right:
-                    platform_below = p
-                    break
-
-            if not platform_below:
-                continue  # try another x
-            
-            # set spawn y to be on top of the platform
-            y = platform_below.top - self.rect.height
-            return x, y
-
-        return 500, 500     # fallback if no safe spot found
-
-    def set_initial_spawn(self, field):
-        if self.spawn is None:
-            self.spawn = self.get_spawn(field)
-
-        self.spawn_from_sky(self.spawn[0])
-
 
     # -----------------
     # RESET METHODS
     # -----------------
     def reset(self):
+        self.x, self.y = self.startposition
         self.vx = 0
         self.vy = 0
         self.on_ground = False
         
-        """
         self.state = "idle"
         self.frame = 0
-        """
 
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
-
-    def reset_after_death(self):
-        self.spawn_from_sky((self.spawn[0]))
-        """
-        if self.spawn is None:
-            self.spawn = 600,350    # Fallback, shouldn't happen
-        self.x, self.y = self.spawn
-        """
-        """
-        self.x, self.y = 600,350
-        self.reset()
-        """
-        
-    def reset_after_win(self, field):
-        self.spawn_from_sky(random.randint(300, 800))
-        """
-        safe_spawn = self.get_spawn(field)
-        self.spawn = safe_spawn
-        self.x, self.y = self.spawn
-        self.x, self.y = random.randint(300,800), 350
-        self.reset()
-        
-        """
-
-        
 
         
     # -----------------
     # MAIN UPDATE LOOP
     # -----------------
-    
     def update(self, keys, delta, field): 
         # Tolkar key input och uppdaterar spelarens horisontella
         # hastighet samt initierar hopp.
@@ -198,7 +106,6 @@ class Player(pygame.sprite.Sprite):
         self.move(delta, field)
         self.set_state()
         self.animate(delta)
-  
    
         
     # --------------
@@ -233,6 +140,10 @@ class Player(pygame.sprite.Sprite):
         
         # Horizontal movement
         self.x += self.vx * delta       # Move x-coordinate, based on speed to create a smooth animation
+        if self.x < 0:      # World borders, player can't move beyond
+            self.x = 0
+        elif self.x > WORLD_WIDTH - self.rect.width:
+            self.x = WORLD_WIDTH - self.rect.width
         self.rect.x = int(self.x)
 
         for p in field.platforms:               # For every platform
@@ -317,27 +228,7 @@ class Player(pygame.sprite.Sprite):
                 self.frame = 0
 
         self.image = self.animations[self.state][int(self.frame)]
-        
-    def spawn_from_sky(self, x=None):
-        
-        if x is None:
-            x = random.randint(300, 800)
-            
-        self.state = "idle"
-        self.frame = 0
-        self.image = self.animations[self.state][0]
-
-
-        self.x = float(x)
-        self.y = -self.rect.height - 100   # above screen
-
-        self.vx = 0
-        self.vy = 0
-        self.on_ground = False
-
-        self.rect.x = int(self.x)
-        self.rect.y = int(self.y)
-        
+    
         
     #spelaren dör, triggar död-animation
     def die(self):

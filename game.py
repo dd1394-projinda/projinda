@@ -14,9 +14,7 @@ from enum import Enum           # Enumeration, name constant values
 
 from field import Field
 
-
 from player import Player
-
 
 from camera import Camera
 
@@ -35,25 +33,23 @@ TEXT_LOSE           = "Maybe try again..."
 TEXT_FUNCTIONS      = "Press r to reset and q to quit"      # Instructions message
 SCREEN_WIDTH        = 1000
 SCREEN_HEIGHT       = 500
-WORLD_WIDTH         = 5000
-WORLD_HEIGHT        = 500
+TILE                = 100
+WORLD_TILES         = 70
+WORLD_WIDTH         = WORLD_TILES * TILE
+WORLD_HEIGHT        = 550
 
 
 # -----------------
 # CREATE WINDOW
 # -----------------
-
-
 pygame.init()                                           # Initialize pygame
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))     # Create screen
 pygame.display.set_caption(caption)                     # Add caption to window
 
 player = Player() #initiera spelare
 
-
 camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT)
-field = Field(WORLD_WIDTH, WORLD_HEIGHT)
-player.set_initial_spawn(field)
+field = Field(WORLD_WIDTH, WORLD_HEIGHT, TILE)
 
 
 # -----------------
@@ -61,7 +57,6 @@ player.set_initial_spawn(field)
 # -----------------
 font = pygame.font.SysFont(TEXT_FONT, 75)               # Create font
 small_font = pygame.font.SysFont(TEXT_FONT, 30)
-
 
 
 # -----------------
@@ -73,18 +68,35 @@ background_image = pygame.transform.smoothscale(background_image, (SCREEN_WIDTH,
 bg_width = background_image.get_width()                                                         
 
 
+
+# -----------------
+# SIGN
+# -----------------
+sign_rect = pygame.Rect(0,0,0,0)        # Placeholder, more of the sign in reset_goal and base_frame
+
+
 # -----------------
 # GOAL
 # -----------------
 def reset_goal():       # Function to reset goal for randomization
-    goal_x = random.randint(0, 1)
-    if goal_x == 0:
-        goal_x = 5
-    else: 
-        goal_x = 4900
+    global sign_rect
+    side = random.randint(0, 1)
+
+    goal_w = 75         # Goal properties
+    goal_h = 225
+
+    sign_w = 150        # Sign properties
+    sign_h = 80
+    sign_y = 270
+
+    if side == 0:       # If left side, goal left, sign right
+        goal_x = 10
+        sign_rect = pygame.Rect(WORLD_WIDTH - 20 - sign_w, sign_y, sign_w, sign_h)
+    if side == 1:       # Opposite
+        goal_x = WORLD_WIDTH - goal_w - 10
+        sign_rect = pygame.Rect(20, sign_y, sign_w, sign_h)
     
-    goal_y = 400 - 250 
-    
+    goal_y = 400 - goal_h 
     return pygame.Rect(goal_x, goal_y, 75, 225) 
 goal_rect = reset_goal()        # Create the goal  
 goal_image = pygame.image.load(os.path.join(BASE_DIR, "images", "goal.png")).convert_alpha()    # Ladda in målgrafik
@@ -101,6 +113,7 @@ def base_frame():                           # Frame where the world is
     for x in range(-bg_width, SCREEN_WIDTH + bg_width, bg_width):      # Gör så att bakgrunden scrollar när spelaren rör på sig
         screen.blit(background_image, (x + offset_x, 0))        # Paint it onto the screen
 
+    # DRAW PLATFORMS
     for p in field.platforms:       # Blocks are made in field.py, from the list of platforms, paint them all onto the screen
         pygame.draw.rect(
             screen,
@@ -108,8 +121,21 @@ def base_frame():                           # Frame where the world is
             p.move(-camera.camera.x, -camera.camera.y)
         )
 
+    # -----------------
+    # DRAW SIGN
+    # -----------------
+    pygame.draw.rect(screen, (60, 40, 20), (sign_rect.x + 55 - camera.camera.x, sign_rect.y + sign_rect.height - camera.camera.y, 10, 50))
+    pygame.draw.rect(screen, (60, 40, 20), (sign_rect.x - camera.camera.x, sign_rect.y - camera.camera.y, sign_rect.width, sign_rect.height))
+    sign_font = pygame.font.SysFont("Arial", 14, bold=True)
+    lines = ["Can't you read a map?", "The goal is on the", "other side!"]
+    for i, line in enumerate(lines):
+        img = sign_font.render(line, True, (255, 255, 255))
+        screen.blit(img, (sign_rect.x + 5 - camera.camera.x, sign_rect.y + 10 + (i * 20) - camera.camera.y))
+    
+    # DRAW GOAL
     screen.blit(goal_image, goal_rect.move(-camera.camera.x, -camera.camera.y))
 
+    # DRAW ENEMIES
     for e in field.enemies:
         pygame.draw.rect(
             screen,
@@ -155,7 +181,7 @@ while running:      # Game loop keeps the window and game going
     delta = clock.tick(60) / 1000        # The frame is at most updated 60 times per second
     running, keys = check_events()       # Get the running state and keys pressed
         
-
+    # DETERMINE/ACT GAME STATE
     if state == GameState.PLAYING:                  # Determine current game state
         player.update(keys,delta,field)             # Update player position
         
@@ -164,18 +190,20 @@ while running:      # Game loop keeps the window and game going
        
         if field.is_enemy(player.rect):             # If contact with enemy block -> lose
             player.die()
-            state = GameState.LOST
+            state = GameState.LOST 
 
     elif state == GameState.LOST:
         player.animate(delta)       #GÖR DÖDANIMATION MEN DEN VAR LOWKEY FUL??
         if keys[pygame.K_r] and not keys[pygame.K_d]:           # Tanget input handle for reset and quit
-            player.reset_after_death()              # Reset function in player, specific for certain game outcomes
+            player.reset()
+            camera.update(player)
             state = GameState.PLAYING               # To keep going after reset  
         elif keys[pygame.K_q]: running = False      # Closes the window immediatly
 
     elif state == GameState.WON:
         if keys[pygame.K_r]: 
-            player.reset_after_win(field)
+            player.reset()
+            field.reset_world()
             goal_rect = reset_goal()
             state = GameState.PLAYING
         elif keys[pygame.K_q]: running = False
@@ -183,9 +211,14 @@ while running:      # Game loop keeps the window and game going
     camera.update(player)       # Kameran följer efter spelaren
     base_frame()                # Clean frame
     
-    image_rect = player.image.get_rect(midbottom=player.rect.midbottom)       # Move player
-    screen.blit(player.image, image_rect.move(-camera.camera.x, -camera.camera.y))                                   # Paint player corresponding to it's environment
-
+    # UPDATE PLAYER POSITION
+    off_x = (player.image.get_width() - player.rect.width) // 2
+    off_y = (player.image.get_height() - player.rect.height)
+    screen.blit(player.image, (player.rect.x - off_x - camera.camera.x, player.rect.y - off_y - camera.camera.y))
+    
+    # -----------------
+    # TEXT OVERLAY
+    # -----------------
     if state == GameState.LOST:
         text = font.render(TEXT_LOSE, True, TEXT_COLOR)                         # Render text
         instructions = small_font.render(TEXT_FUNCTIONS, True, TEXT_COLOR)      
@@ -199,5 +232,3 @@ while running:      # Game loop keeps the window and game going
         screen.blit(instructions,(100,200))
         
     pygame.display.update()     # Update screen
-    
-    

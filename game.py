@@ -25,7 +25,7 @@ from camera import Camera
 caption             = "Platform Game"       # Window name
 background_colour   = (0,0,0)               # Amount of red, green, blue (255 is max, 0 is no color)
 platform_colour     = (95, 148, 108)      
-enemy_colour        = (173, 69, 31)
+enemy_colour        = (230, 69, 60)
 TEXT_COLOR          = (255, 255, 255)
 TEXT_FONT           = "consolas"                            # Type of font
 TEXT_WIN            = "You won!"                            # Game state messages
@@ -34,8 +34,8 @@ TEXT_FUNCTIONS      = "Press r to reset and q to quit"      # Instructions messa
 SCREEN_WIDTH        = 1000
 SCREEN_HEIGHT       = 500
 TILE                = 100
-WORLD_TILES         = 70
-WORLD_WIDTH         = WORLD_TILES * TILE
+TILE_AMOUNT         = 70
+WORLD_WIDTH         = TILE_AMOUNT * TILE
 WORLD_HEIGHT        = 550
 
 
@@ -55,29 +55,28 @@ field = Field(WORLD_WIDTH, WORLD_HEIGHT, TILE)
 # -----------------
 # FONT
 # -----------------
-font = pygame.font.SysFont(TEXT_FONT, 75)               # Create font
-small_font = pygame.font.SysFont(TEXT_FONT, 30)
+font        = pygame.font.SysFont(TEXT_FONT, 75)               # Create font
+small_font  = pygame.font.SysFont(TEXT_FONT, 30)
 
 
 # -----------------
-# BACKGROUND
+# IMAGES
 # -----------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))                                           # Define directory as the current
-background_image = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()      # Ladda in bilden
-background_image = pygame.transform.smoothscale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))              # Skala om den till skärmens storlek
-bg_width = background_image.get_width()                                                         
-
+BASE_DIR            = os.path.dirname(os.path.abspath(__file__))                                           # Define directory as the current
+background_image    = pygame.image.load(os.path.join(BASE_DIR, "images", "bg.png")).convert()      # Ladda in bilden
+background_image    = pygame.transform.smoothscale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))              # Skala om den till skärmens storlek
+bg_width            = background_image.get_width()                                                         
+grass_img           = pygame.transform.scale(pygame.image.load(os.path.join(BASE_DIR, "images", "grass.png")).convert(), (TILE, TILE//5))
+grass2_img           = pygame.transform.scale(pygame.image.load(os.path.join(BASE_DIR, "images", "grass2.png")).convert(), (TILE, TILE//5))
+enemy_img           = pygame.transform.scale(pygame.image.load(os.path.join(BASE_DIR, "images", "enemy.png")).convert(), (40,40))
+dirt_img            = pygame.transform.scale(pygame.image.load(os.path.join(BASE_DIR, "images", "dirt.png")).convert(), (TILE, TILE))
 
 
 # -----------------
-# SIGN
+# GOAL & SIGN
 # -----------------
 sign_rect = pygame.Rect(0,0,0,0)        # Placeholder, more of the sign in reset_goal and base_frame
 
-
-# -----------------
-# GOAL
-# -----------------
 def reset_goal():       # Function to reset goal for randomization
     global sign_rect
     side = random.randint(0, 1)
@@ -115,11 +114,18 @@ def base_frame():                           # Frame where the world is
 
     # DRAW PLATFORMS
     for p in field.platforms:       # Blocks are made in field.py, from the list of platforms, paint them all onto the screen
+        drawn = p.move(-camera.camera.x, -camera.camera.y)
+        if drawn.right < 0 or drawn.left > SCREEN_WIDTH:   # Skip if off screen horizontally
+            continue
+        screen.blit(grass2_img, (drawn.x, drawn.top))              # Top tile = grass
+        for y in range(drawn.top + TILE//5, drawn.bottom, TILE):
+            screen.blit(dirt_img, (drawn.x, y))     
+        """
         pygame.draw.rect(
             screen,
             platform_colour,
             p.move(-camera.camera.x, -camera.camera.y)
-        )
+        )"""
 
     # -----------------
     # DRAW SIGN
@@ -137,6 +143,12 @@ def base_frame():                           # Frame where the world is
 
     # DRAW ENEMIES
     for e in field.enemies:
+        """
+        drawn = e.move(-camera.camera.x, -camera.camera.y)
+        if drawn.right < 0 or drawn.left > SCREEN_WIDTH:
+            continue
+        if e.width == field.ENEMY_SIZE:
+            screen.blit(enemy_img, drawn)"""
         pygame.draw.rect(
             screen,
             enemy_colour,
@@ -231,4 +243,4 @@ while running:      # Game loop keeps the window and game going
         screen.blit(text,(100,100))
         screen.blit(instructions,(100,200))
         
-    pygame.display.update()     # Update screen
+    pygame.display.update()     # Update screend

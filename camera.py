@@ -15,7 +15,6 @@ class Camera:
         
     def update(self, player):
         x = player.rect.centerx - self.screen_width // 2           # Centrera spelaren på skärmen
-        y = player.rect.centery - self.screen_height // 2 #- 120    # Flytta skärmen med spelaren vid hopp. det här slutade funka när jag ta till nya paramentrar rip.
         
         x = max(0, min(x, self.world_width - self.screen_width))
         y = 0

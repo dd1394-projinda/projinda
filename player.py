@@ -58,11 +58,13 @@ class Player(pygame.sprite.Sprite):
         self.image              = self.animations[self.state][0]
         
         self.startposition  = (3500.0, 100.0)   # To make them floats for better accuracy
+        self.rect = pygame.Rect(0, 0, 55, 24)
 
-        self.rect = pygame.Rect(450, -150, 55, 24) #hitbox
-        
         self.x = self.startposition[0]
         self.y = self.startposition[1]
+
+        self.rect.x = int(self.x)
+        self.rect.y = int(self.y)
         
         self.vx = 0
         self.vy = 0

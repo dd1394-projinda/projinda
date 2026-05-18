@@ -1,26 +1,52 @@
 # projinda
-frances och josephines projinda-spel
 
-## Plattformsspel
-- 2D (bakgrund och mark) 
-- Python (pygame)
+Ett 2D-plattformsspel byggt i Python med pygame.
 
-### Spellogik
-Det finns en bana. Spelaren börjar på en plats i banan och ska ta sig till målet. Det finns hinder som gör det svårare. 
-#### Object
-Allt på eller över marken
-- Block
-- X klossar (farliga)
-- Hål (mark saknas, farligt)
-#### Vinner
-Spelaren hittar målet
-#### Förlorar
-Går in i x kloss eller faller ned. Spelaren börjar om igen på samma ställe
+## Features
+- Kamera som följer spelaren
+- Slumpmässigt genererade plattformar
+- Hål och farliga block
+- Sprite-animationer
+- Kollisionssystem
+- Win/lose states
 
-### Randomisering
-#### Startposition
-Spelaren startar på en random plats i spelet inom ett visst intervall (så att man inte kan råka starta för nära målet eller i ett block). Ifall man förlorar så är det denna plats man startar på igen. 
-#### Målposition
-Randomize när spelet först startas (inte varje gång). Förlorar man och vill spela igen är målet på samma plats men går man ut ur spelet och in igen är det random. (random höger och vänster, eller oxå inom ett intervall)
-### Kamera
-Hela spelplannen syns inte utan spelar är i mitten och rör sig med den.
+## Spellogik
+
+Spelaren spawnar på en slumpmässig säker plats inom ett fördefinierat område av världen och ska ta sig till målet utan att dö.
+
+### Vinna
+Spelaren vinner när den nuddar målet.
+
+### Förlora
+Spelaren förlorar om den träffar ett farligt block eller faller ner i ett hål. Efter förlust kan spelaren trycka R för att försöka igen på samma bana, eller Q för att avsluta spelet.
+
+## Objekt i världen
+- Plattformar/block
+- Farliga block
+- Hål där mark saknas
+
+## Bana
+Banan genereras slumpmässigt när spelet startar. Plattformar placeras ut med varierande höjd och hål kan uppstå mellan dem. Farliga block spawnar på vissa plattformar.
+
+## Startposition
+Spawn-systemet säkerställer att spelaren inte spawnar inne i block, inte spawnar på fiender och alltid har mark under sig
+
+## Kamera
+Kameran följer spelarens position och håller spelaren centrerad på skärmen istället för att visa hela världen samtidigt.
+
+## Kontroller
+
+| Tangent | Funktion |
+|---|---|
+| A | Gå vänster |
+| D | Gå höger |
+| SPACE | Hoppa |
+| R | Starta om |
+| Q | Lämna spelet |
+
+## Hur man spelar
+
+Installera pygame:
+
+```bash
+pip install pygame

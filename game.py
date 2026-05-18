@@ -120,12 +120,8 @@ def base_frame():                           # Frame where the world is
         screen.blit(grass2_img, (drawn.x, drawn.top))              # Top tile = grass
         for y in range(drawn.top + TILE//5, drawn.bottom, TILE):
             screen.blit(dirt_img, (drawn.x, y))     
-        """
-        pygame.draw.rect(
-            screen,
-            platform_colour,
-            p.move(-camera.camera.x, -camera.camera.y)
-        )"""
+    
+    
 
     # -----------------
     # DRAW SIGN
@@ -143,17 +139,15 @@ def base_frame():                           # Frame where the world is
 
     # DRAW ENEMIES
     for e in field.enemies:
-        """
         drawn = e.move(-camera.camera.x, -camera.camera.y)
+
         if drawn.right < 0 or drawn.left > SCREEN_WIDTH:
             continue
-        if e.width == field.ENEMY_SIZE:
-            screen.blit(enemy_img, drawn)"""
-        pygame.draw.rect(
-            screen,
-            enemy_colour,
-            e.move(-camera.camera.x, -camera.camera.y)
-        )
+
+        if e.width == field.ENEMY_SIZE and e.height == field.ENEMY_SIZE:
+            screen.blit(enemy_img, drawn)
+        else:
+            pygame.draw.rect(screen, enemy_colour, drawn)
 
 
 
@@ -243,4 +237,4 @@ while running:      # Game loop keeps the window and game going
         screen.blit(text,(100,100))
         screen.blit(instructions,(100,200))
         
-    pygame.display.update()     # Update screend
+    pygame.display.update()     # Update screen

@@ -38,8 +38,7 @@ class Player(pygame.sprite.Sprite):
         ss_walk = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "walk.png"))
         ss_idle = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "idle.png"))
         ss_jump = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "jump.png"))
-        ss_run = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "run.png"))
-        ss_dead = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "run.png"))
+        ss_dead = spritesheet.spritesheet(os.path.join(BASE_DIR, "images", "dead.png"))
         
         #kan lägga till död, skadad, spring, attack, etc. många idleanimationer. bilder finns! finns även en röd slime som kan vara fiende?
 
@@ -48,7 +47,6 @@ class Player(pygame.sprite.Sprite):
             "walk": ss_walk.load_strip((0, 0, 128, 128), 8),
             "idle": ss_idle.load_strip((0, 0, 128, 128), 8),
             "jump": ss_jump.load_strip((0, 0, 128, 128), 13),
-            "run":  ss_run.load_strip((0, 0, 128, 128), 7),
             "dead": ss_dead.load_strip((0, 0, 128, 128), 3),
         }
         

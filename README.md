@@ -50,3 +50,9 @@ Installera pygame:
 
 ```bash
 pip install pygame
+```
+
+## Användning av AI
+AI användes bland annat för att skapa viss grafik (tex banans bakgrundsbild), förstå hjälpkoden spritesheet.y, hitta källor och dokumentation för Pygame, felsöka buggar, tolka felmeddelanden samt hjälpa till att förbättra dokumentationen. 
+
+Allt material och alla förslag från AI har granskats, testats och anpassats av oss innan det användes i projektet.
